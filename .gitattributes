@@ -1,0 +1,13 @@
+# O dado bruto e byte-a-byte parte do exercicio: o BOM e o CRLF fazem parte do
+# que precisa ser higienizado, e `core.autocrlf` normalizaria isso em silencio.
+# Sem `-text` aqui, quem clona em Linux/macOS recebe um bruto diferente do que
+# o CLAUDE.md documenta.
+raw_data/*.csv -text
+
+# Os arquivos gerados por scripts/ saem sempre com LF -- pinar o fim de linha
+# evita que um clone em outro sistema mostre "modificado" sem ninguem ter mexido.
+data_hygiene/*_clean_*.csv text eol=lf
+data_hygiene/*_qa_*.md     text eol=lf
+dashboards/*_dash_*.html   text eol=lf
+scripts/*.py               text eol=lf
+scripts/*.html             text eol=lf
