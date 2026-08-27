@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon Festival 2012 — Evento Musical</title>
+  <style>
+    /* Tokens do design system do projeto (dashboards/design_system/design_system.html) */
+    :root{
+      --bg:#11161d;
+      --bg-2:#1a222c;
+      --panel:#f4f6f8;
+      --panel-2:#ffffff;
+      --ink:#131a22;
+      --muted:#77808b;
+      --line:#dfe4e8;
+      --cyan:#00c9c8;
+      --cyan-2:#00a6a7;
+      --orange:#ff5b1a;
+      --magenta:#ff1478;
+      --yellow:#ffc928;
+      --green:#27c57a;
+      --danger:#eb344d;
+      --shadow:0 16px 40px rgba(0,0,0,.22);
+      --radius:2px;
+      --speed:240ms;
+      --ease:cubic-bezier(.2,.8,.2,1);
+
+      /* Extensao: as 7 pulseiras da base precisam de identidade propria */
+      --p-yellow:#ffc928;
+      --p-green:#27c57a;
+      --p-blue:#2f9bff;
+      --p-pink:#ff1478;
+      --p-orange:#ff5b1a;
+      --p-purple:#8b5cf6;
+      --p-gold:#c9962b;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:#fff;
+      font-family:Segoe UI, Inter, Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0/28px 28px,
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px) 0 0/28px 28px,
+        radial-gradient(circle at 18% 0%, rgba(0,201,200,.15), transparent 34%),
+        radial-gradient(circle at 90% 25%, rgba(255,20,120,.1), transparent 28%),
+        linear-gradient(160deg,var(--bg),#0d1218 70%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;
+      background:linear-gradient(120deg, transparent 0 44%, rgba(255,255,255,.025) 45% 46%, transparent 47%);
+      opacity:.55;z-index:0;
+    }
+
+    .shell{position:relative;z-index:1;width:min(1480px,calc(100% - 36px));margin:0 auto;padding:24px 0 72px}
+    .topbar{
+      height:48px;display:flex;align-items:center;gap:14px;
+      color:#cbd3db;font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+      border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;color:#fff;letter-spacing:.04em}
+    .brand-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--magenta));clip-path:polygon(0 18%,100% 0,82% 42%,100% 58%,0 100%,18% 56%)}
+    .spacer{flex:1}
+    .credit{padding:7px 10px;background:#fff;color:#111;font-weight:800}
+    .level{display:inline-flex;align-items:center;gap:7px}
+    .level b{background:var(--yellow);color:#171717;padding:5px 8px}
+
+    .tabs{display:flex;gap:2px;align-items:end;overflow:auto;background:#e7eaed;color:#6e7580;padding:0 4px;box-shadow:var(--shadow)}
+    .tab{
+      border:0;background:transparent;color:inherit;padding:11px 14px;text-decoration:none;
+      font:700 11px/1 Segoe UI, sans-serif;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+      transition:all var(--speed) var(--ease);display:inline-flex;align-items:center;gap:7px;
+    }
+    .tab:hover{background:#fff;color:#222}
+    .tab.active{background:#fff;color:var(--orange);box-shadow:inset 0 -3px var(--orange)}
+    .tab .dot{width:9px;height:9px;flex:0 0 9px}
+
+    .page-title{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:34px 0 18px}
+    .eyebrow{color:var(--cyan);font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.16em}
+    h1{margin:5px 0 0;font-size:clamp(34px,4vw,60px);line-height:.92;text-transform:uppercase;letter-spacing:-.04em}
+    .page-title p{max-width:560px;color:#9aa5b0;line-height:1.5;margin:0}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .card{
+      position:relative;background:var(--panel);color:var(--ink);
+      min-height:130px;padding:18px;overflow:hidden;box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.6);
+      transition:transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+    }
+    .card:hover{transform:translateY(-3px);box-shadow:0 24px 52px rgba(0,0,0,.3)}
+    .card.cyan{background:var(--cyan);color:#032c2e}
+    .card.dark{background:#17202a;color:#f8fafb;border-color:#27323e}
+    .card.magenta{background:linear-gradient(135deg,#a50750,var(--magenta));color:#fff}
+    .card.flat:hover{transform:none;box-shadow:var(--shadow)}
+    .card.hero{min-height:330px;background:
+      linear-gradient(180deg,rgba(9,18,26,.08),rgba(9,18,26,.72)),
+      radial-gradient(circle at 70% 20%,rgba(0,201,200,.55),transparent 22%),
+      linear-gradient(135deg,#30424a,#111820 58%,#29323b);color:#fff}
+    .card.hero:before{
+      content:"";position:absolute;inset:-20% -10%;opacity:.34;
+      background:repeating-linear-gradient(120deg, transparent 0 42px, rgba(255,255,255,.08) 43px 45px, transparent 46px 78px);
+      transform:rotate(-7deg);
+    }
+
+    .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}
+    .span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}
+    .span-12{grid-column:span 12}
+
+    .card-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--muted)}
+    .dark .card-label,.hero .card-label,.magenta .card-label{color:#c8d2db}
+    .cyan .card-label{color:#04494b}
+    .metric{font-size:46px;font-weight:900;letter-spacing:-.045em;margin-top:8px;line-height:1}
+    .metric small{font-size:18px;color:var(--muted);letter-spacing:0;font-weight:800}
+    .dark .metric small,.magenta .metric small,.hero .metric small{color:#9fadb9}
+    .cyan .metric small{color:#04494b}
+    .metric.mid{font-size:32px}
+    .note{font-size:11px;line-height:1.5;color:var(--muted);margin-top:9px}
+    .dark .note,.magenta .note,.hero .note{color:#9fadb9}
+    .cyan .note{color:#04585a}
+    .kicker{position:absolute;right:16px;top:15px;font-size:56px;font-weight:900;opacity:.08;line-height:1;letter-spacing:-.07em}
+
+    .hero-copy{position:absolute;left:22px;bottom:22px;right:22px;z-index:2}
+    .hero-copy h2{font-size:clamp(24px,2.4vw,34px);line-height:.95;margin:8px 0;text-transform:uppercase;letter-spacing:-.04em}
+    .hero-copy p{margin:0;color:#c8d3dc;font-size:13px;line-height:1.55;max-width:52ch}
+    .hero-chip{display:inline-flex;gap:7px;align-items:center;background:rgba(0,0,0,.35);padding:6px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+    .hero-dot{width:8px;height:8px;background:var(--orange);border-radius:50%;box-shadow:0 0 0 4px rgba(255,91,26,.18)}
+    .hero-stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px}
+    .hero-stats div{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#93a1ad}
+    .hero-stats b{display:block;font-size:23px;color:#fff;letter-spacing:-.03em;margin-top:3px}
+
+    .section{margin-top:42px}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}
+    .section-head h2{font-size:19px;margin:0;text-transform:uppercase;letter-spacing:.02em}
+    .section-head h2 em{font-style:normal;color:var(--cyan);margin-right:9px}
+    .section-head span{font-size:11px;color:#77838f;text-transform:uppercase;letter-spacing:.12em;text-align:right}
+    .lede{color:#9aa5b0;font-size:13px;line-height:1.6;margin:0 0 14px;max-width:82ch}
+    .lede b{color:#fff}
+
+    /* Ranking horizontal: 8 palcos com nome longo nao cabem em barra vertical */
+    .hbars{display:grid;gap:7px;margin-top:14px}
+    .hbar{
+      display:grid;grid-template-columns:132px 1fr 92px;gap:12px;align-items:center;
+      border:0;background:transparent;padding:5px 6px;width:100%;text-align:left;
+      font:inherit;color:inherit;cursor:pointer;position:relative;
+      transition:background var(--speed) var(--ease);
+    }
+    .hbar:hover{background:#e9edf0}
+    .hbar.is-selected{background:#e4e9ed;box-shadow:inset 3px 0 var(--orange)}
+    .hbar .nome{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hbar .trilha{height:19px;background:#e2e7ea;position:relative;overflow:hidden}
+    .hbar .fill{
+      position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--cyan-2),var(--cyan));
+      transform-origin:left;animation:grow .65s var(--ease) forwards;
+    }
+    .hbar.lider .fill{background:linear-gradient(90deg,#d63b00,var(--orange))}
+    .hbar .valor{font-size:13px;font-weight:900;text-align:right;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+    .hbar .zero{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+    .filtro{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .filtro-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#77838f;font-weight:800}
+
+    .kv{display:grid;grid-template-columns:1fr auto;gap:7px 12px;margin-top:12px;font-size:12px}
+    .kv dt{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.07em;font-weight:800;align-self:center}
+    .kv dd{margin:0;font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
+    .dark .kv dt{color:#8d9aa6}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .mini-table th,.mini-table td{padding:9px 8px;border-top:1px solid #e2e6e9;text-align:left}
+    .mini-table th{font-size:10px;color:#87919a;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+    .mini-table td.num{text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
+    .mini-table .rank{color:var(--muted);font-weight:900;width:22px}
+    .mini-table .sub{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .dark .mini-table th,.dark .mini-table td{border-color:#2b3641}
+    .dark .mini-table .sub{color:#8d9aa6}
+    .mini-table tr.destaque td{background:#fff5ee}
+    .mini-table tr.destaque .marca{color:var(--orange);font-weight:900}
+
+    .podio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}
+    .pos{position:relative;background:var(--panel);color:var(--ink);padding:18px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.6)}
+    .pos .lugar{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .pos h3{margin:8px 0 0;font-size:clamp(15px,1.5vw,21px);text-transform:uppercase;letter-spacing:-.02em;line-height:1.05}
+    .pos .publico{font-size:31px;font-weight:900;letter-spacing:-.04em;margin-top:10px;font-variant-numeric:tabular-nums}
+    .pos .publico small{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:0}
+    .pos.p1{min-height:224px;background:linear-gradient(160deg,#fff,var(--panel));box-shadow:0 22px 48px rgba(0,0,0,.3)}
+    .pos.p1:after{content:"";position:absolute;inset:0;border:3px solid var(--orange);pointer-events:none}
+    .pos.p2{min-height:190px}
+    .pos.p3{min-height:166px}
+    .pos .faixa{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.45}
+
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#e6ebee;color:#37414c;padding:4px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+    .chip i{width:8px;height:8px}
+    .dark .chip{background:#222d38;color:#c3cdd7}
+
+    .footer{margin-top:54px;padding-top:18px;border-top:1px solid rgba(255,255,255,.09);display:flex;justify-content:space-between;gap:24px;color:#7e8993;font-size:11px;flex-wrap:wrap}
+    .footer a{color:#a9b4be}
+    .footer p{margin:0 0 6px;line-height:1.7;max-width:74ch}
+    .badge{display:inline-flex;align-items:center;gap:7px;background:#1d2731;color:#c8d0d7;padding:6px 8px;white-space:nowrap}
+
+    @media (max-width:1100px){
+      .span-3{grid-column:span 6}.span-4{grid-column:span 6}
+      .span-5,.span-7,.span-8{grid-column:span 12}
+    }
+    @media (max-width:700px){
+      .shell{width:min(100% - 20px,1480px)}
+      .page-title{align-items:start;flex-direction:column}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}
+      h1{font-size:40px}
+      .metric{font-size:38px}
+      .topbar{font-size:9px}
+      .credit{display:none}
+      .section-head{flex-direction:column;align-items:start}
+      .section-head span{text-align:left}
+      .hbar{grid-template-columns:96px 1fr 74px;gap:8px}
+      .podio{grid-template-columns:1fr}
+      .pos.p1,.pos.p2,.pos.p3{min-height:0}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+      .hbar .fill{transform:none!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand"><span class="brand-mark"></span>Horizon Festival 2012</div>
+      <div class="level"><b>002</b> Evento musical</div>
+      <div class="spacer"></div>
+      <div>Dados sintéticos · base higienizada</div>
+      <div class="credit" id="topReceita"></div>
+    </div>
+
+    <nav class="tabs" aria-label="Atos da análise">
+      <a class="tab active" href="#abertura">Abertura</a>
+      <a class="tab" href="#ato-palcos">01 · Palcos</a>
+      <a class="tab" href="#ato-artistas">02 · Artistas</a>
+      <a class="tab" href="#ato-musicas">03 · Músicas</a>
+      <a class="tab" href="#procedencia">Procedência</a>
+    </nav>
+
+    <header class="page-title" id="abertura">
+      <div>
+        <div class="eyebrow" id="eyebrowPeriodo"></div>
+        <h1>Sete dias,<br/>oito palcos</h1>
+      </div>
+      <p id="resumoTopo"></p>
+    </header>
+
+    <!-- ABERTURA -->
+    <section class="grid">
+      <article class="card hero span-7">
+        <div class="hero-copy">
+          <span class="hero-chip"><i class="hero-dot"></i> O festival em números</span>
+          <h2 id="heroTitulo"></h2>
+          <p id="heroTexto"></p>
+          <div class="hero-stats" id="heroStats"></div>
+        </div>
+      </article>
+
+      <article class="card cyan span-5">
+        <span class="kicker">01</span>
+        <div class="card-label">Ingressos emitidos</div>
+        <div class="metric" id="kpiIngressos"></div>
+        <div class="note" id="kpiIngressosNota"></div>
+      </article>
+
+      <article class="card span-3">
+        <span class="kicker">US$</span>
+        <div class="card-label">Receita total</div>
+        <div class="metric mid" id="kpiReceita"></div>
+        <div class="note" id="kpiReceitaNota"></div>
+      </article>
+      <article class="card span-3">
+        <span class="kicker">IN</span>
+        <div class="card-label">Taxa de check-in</div>
+        <div class="metric mid" id="kpiCheckin"></div>
+        <div class="note" id="kpiCheckinNota"></div>
+      </article>
+      <article class="card span-3">
+        <span class="kicker">★</span>
+        <div class="card-label">Nota do público</div>
+        <div class="metric mid" id="kpiNota"></div>
+        <div class="note" id="kpiNotaNota"></div>
+      </article>
+      <article class="card magenta span-3">
+        <span class="kicker">OC</span>
+        <div class="card-label">Ocupação média</div>
+        <div class="metric mid" id="kpiOcupacao"></div>
+        <div class="note" id="kpiOcupacaoNota"></div>
+      </article>
+    </section>
+
+    <!-- ATO 1 -->
+    <section class="section" id="ato-palcos">
+      <div class="section-head">
+        <h2><em>01</em>O palco que dominou o festival</h2>
+        <span id="ato1Selo"></span>
+      </div>
+      <p class="lede" id="ato1Lede"></p>
+
+      <div class="filtro">
+        <span class="filtro-label" id="filtroLabel">Pulseira</span>
+        <div class="tabs" role="group" aria-labelledby="filtroLabel" id="filtroCores"></div>
+      </div>
+
+      <div class="grid">
+        <article class="card flat span-8">
+          <div class="card-label" id="rankingLabel"></div>
+          <div class="hbars" id="rankingPalcos" role="list"></div>
+          <div class="note" id="rankingNota"></div>
+        </article>
+
+        <article class="card dark span-4" id="drilldown" aria-live="polite">
+          <span class="kicker" id="drillKicker"></span>
+          <div class="card-label">Palco selecionado</div>
+          <div class="metric mid" id="drillNome"></div>
+          <dl class="kv" id="drillKv"></dl>
+          <div class="card-label" style="margin-top:18px">Principais atrações</div>
+          <div id="drillAtracoes"></div>
+        </article>
+
+        <article class="card flat span-12">
+          <div class="card-label" id="pulseiraLabel"></div>
+          <div class="hbars" id="rankingPulseiras" role="list"></div>
+          <div class="note" id="pulseiraNota"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ATO 2 -->
+    <section class="section" id="ato-artistas">
+      <div class="section-head">
+        <h2><em>02</em>Quem trouxe a multidão</h2>
+        <span id="ato2Selo"></span>
+      </div>
+      <p class="lede" id="ato2Lede"></p>
+
+      <div class="podio" id="podio"></div>
+
+      <div class="grid" style="margin-top:10px">
+        <article class="card dark span-12 flat">
+          <div class="card-label">A ressalva: volume não é o mesmo que atração por show</div>
+          <p class="note" id="ressalvaTexto"></p>
+          <table class="mini-table" id="tabelaMedia"></table>
+        </article>
+      </div>
+    </section>
+
+    <!-- ATO 3 -->
+    <section class="section" id="ato-musicas">
+      <div class="section-head">
+        <h2><em>03</em>As queridinhas do público</h2>
+        <span id="ato3Selo"></span>
+      </div>
+      <p class="lede" id="ato3Lede"></p>
+
+      <div class="grid">
+        <article class="card span-6 flat">
+          <div class="card-label">Mais amadas · nota média do público</div>
+          <table class="mini-table" id="tabelaAmadas"></table>
+        </article>
+        <article class="card span-6 flat">
+          <div class="card-label">Mais lotadas · público somado</div>
+          <table class="mini-table" id="tabelaLotadas"></table>
+        </article>
+        <article class="card cyan span-12 flat">
+          <div class="card-label">O cruzamento das duas listas</div>
+          <div class="metric mid" id="cruzamentoTitulo"></div>
+          <div class="note" id="cruzamentoTexto"></div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer" id="procedencia">
+      <div>
+        <p id="procTexto"></p>
+        <p id="procDerivados"></p>
+      </div>
+      <span class="badge">SEM LIBS · RESPONSIVO · DADO RASTREÁVEL</span>
+    </footer>
+  </div>
+
+  <script id="dados" type="application/json">__DADOS__</script>
+  <script>
+  (function(){
+    "use strict";
+    const D = JSON.parse(document.getElementById('dados').textContent);
+    const A = D.apresentacoes;
+
+    /* ---------- formatação (pt-BR, via Intl nativo) ---------- */
+    const f0 = new Intl.NumberFormat('pt-BR');
+    const f1 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+    const f2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const int = n => f0.format(Math.round(n || 0));
+    const um = n => f1.format(n || 0);
+    const dois = n => f2.format(n || 0);
+    const dinheiro = n => 'US$ ' + dois(n || 0);
+    const milhoes = n => 'US$ ' + um((n || 0) / 1e6) + ' M';
+    const pct = n => um(n || 0) + '%';
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    const soma = (rows, campo) => rows.reduce((t, r) => t + r[campo], 0);
+    const media = (rows, campo) => rows.length ? soma(rows, campo) / rows.length : 0;
+    const unicos = (rows, campo) => new Set(rows.map(r => r[campo])).size;
+    const receita = rows => soma(rows,'rec_ing') + soma(rows,'rec_ab') + soma(rows,'rec_merch');
+    const corVar = cor => 'var(--p-' + cor.toLowerCase() + ')';
+
+    /* ---------- estado ---------- */
+    let corAtiva = 'TODAS';
+    let palcoAtivo = D.palcos[0];
+
+    const filtradas = () => corAtiva === 'TODAS' ? A : A.filter(a => a.cor === corAtiva);
+
+    /* ---------- agregações ---------- */
+    function agruparPor(rows, campo){
+      const m = new Map();
+      for (const r of rows){
+        let g = m.get(r[campo]);
+        if (!g){ g = {chave:r[campo], linhas:[]}; m.set(r[campo], g); }
+        g.linhas.push(r);
+      }
+      for (const g of m.values()){
+        g.ingressos = soma(g.linhas,'ingressos');
+        g.checkins  = soma(g.linhas,'checkins');
+        g.pessoas   = soma(g.linhas,'pessoas');
+        g.no_show   = soma(g.linhas,'no_show');
+        g.receita   = receita(g.linhas);
+        g.rec_ing   = soma(g.linhas,'rec_ing');
+        g.rec_ab    = soma(g.linhas,'rec_ab');
+        g.rec_merch = soma(g.linhas,'rec_merch');
+        g.apres     = g.linhas.length;
+        g.nota      = media(g.linhas,'nota');
+        g.ocupacao  = media(g.linhas,'ocupacao');
+        g.media_show= g.apres ? g.checkins / g.apres : 0;
+      }
+      return m;
+    }
+
+    /* Palcos sempre na ordem do evento inteiro, com zero quando o filtro de
+       cor não tem apresentação naquele palco — assim o ranking não reordena
+       nem faz palco desaparecer ao trocar de pulseira. */
+    function palcosOrdenados(rows){
+      const m = agruparPor(rows, 'palco');
+      return D.palcos.map(nome => m.get(nome) || {
+        chave:nome, linhas:[], ingressos:0, checkins:0, pessoas:0, no_show:0,
+        receita:0, rec_ing:0, rec_ab:0, rec_merch:0, apres:0, nota:0, ocupacao:0, media_show:0
+      });
+    }
+
+    /* ---------- abertura ---------- */
+    function renderAbertura(){
+      const ing = soma(A,'ingressos'), chk = soma(A,'checkins'), rec = receita(A);
+      const dias = unicos(A,'data'), palcos = D.palcos.length;
+      const artistas = unicos(A,'artista'), faixas = unicos(A,'faixa');
+
+      const datas = A.map(a => a.data).sort();
+      const MES = ['janeiro','fevereiro','março','abril','maio','junho','julho',
+                   'agosto','setembro','outubro','novembro','dezembro'];
+      const diaDe = d => parseInt(d.slice(8,10),10);
+      const mesDe = d => MES[parseInt(d.slice(5,7),10) - 1];
+      const anoDe = d => d.slice(0,4);
+      const ini = datas[0], fim = datas[datas.length - 1];
+      document.getElementById('eyebrowPeriodo').textContent =
+        'Evento musical · ' + diaDe(ini) + ' a ' + diaDe(fim) + ' de ' + mesDe(fim)
+        + ' de ' + anoDe(fim);
+
+      document.getElementById('topReceita').textContent = milhoes(rec);
+      document.getElementById('resumoTopo').textContent =
+        A.length + ' apresentações em ' + dias + ' dias e ' + palcos + ' palcos, com '
+        + artistas + ' artistas e ' + faixas + ' faixas. Cada linha da base é uma '
+        + 'apresentação: quem tocou, onde, para qual pulseira e quanto entrou.';
+
+      const lider = palcosOrdenados(A)[0];
+      document.getElementById('heroTitulo').textContent = int(ing) + ' ingressos emitidos';
+      document.getElementById('heroTexto').textContent =
+        'O festival movimentou ' + milhoes(rec) + ' em ingressos, alimentação e merch. '
+        + 'Um terço dos ingressos saiu de um único palco — o ' + lider.chave
+        + ' — e o público avaliou o evento em ' + dois(media(A,'nota')) + ' de 10.';
+      document.getElementById('heroStats').innerHTML = [
+        ['Dias', int(dias)], ['Palcos', int(palcos)],
+        ['Artistas', int(artistas)], ['Faixas', int(faixas)],
+        ['Apresentações', int(A.length)]
+      ].map(([r,v]) => '<div>' + r + '<b>' + v + '</b></div>').join('');
+
+      document.getElementById('kpiIngressos').innerHTML = int(ing);
+      document.getElementById('kpiIngressosNota').textContent =
+        'Somados nas ' + A.length + ' apresentações. ' + int(chk) + ' viraram check-in e '
+        + int(soma(A,'no_show')) + ' não compareceram.';
+
+      document.getElementById('kpiReceita').innerHTML = milhoes(rec);
+      document.getElementById('kpiReceitaNota').textContent =
+        'Ingressos ' + milhoes(soma(A,'rec_ing')) + ' · A&B ' + milhoes(soma(A,'rec_ab'))
+        + ' · Merch ' + milhoes(soma(A,'rec_merch')) + '.';
+
+      document.getElementById('kpiCheckin').innerHTML = um(chk / ing * 100) + '<small>%</small>';
+      document.getElementById('kpiCheckinNota').textContent =
+        int(chk) + ' check-ins sobre ' + int(ing) + ' ingressos emitidos.';
+
+      document.getElementById('kpiNota').innerHTML = dois(media(A,'nota')) + '<small>/10</small>';
+      const notas = A.map(a => a.nota);
+      document.getElementById('kpiNotaNota').textContent =
+        'Média das ' + A.length + ' apresentações, de ' + um(Math.min.apply(null,notas))
+        + ' a ' + um(Math.max.apply(null,notas)) + '.';
+
+      document.getElementById('kpiOcupacao').innerHTML = um(media(A,'ocupacao')) + '<small>%</small>';
+      document.getElementById('kpiOcupacaoNota').textContent =
+        'Público na área sobre a capacidade. A base não registra ocupação acima de 100%.';
+    }
+
+    /* ---------- ato 1: palcos ---------- */
+    function renderFiltro(){
+      const alvo = document.getElementById('filtroCores');
+      const itens = ['TODAS'].concat(D.cores);
+      alvo.innerHTML = itens.map(cor => {
+        const ativa = cor === corAtiva ? ' active' : '';
+        const bola = cor === 'TODAS' ? ''
+          : '<i class="dot" style="background:' + corVar(cor) + '"></i>';
+        return '<button class="tab' + ativa + '" data-cor="' + esc(cor) + '" aria-pressed="'
+             + (cor === corAtiva) + '">' + bola + esc(cor) + '</button>';
+      }).join('');
+      alvo.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => { corAtiva = b.dataset.cor; renderAto1(); });
+      });
+    }
+
+    function renderRankingPalcos(){
+      const palcos = palcosOrdenados(filtradas());
+      const maxIng = Math.max.apply(null, palcos.map(p => p.ingressos).concat([1]));
+      const totalIng = soma(filtradas(),'ingressos');
+
+      document.getElementById('rankingLabel').textContent =
+        'Ingressos emitidos por palco' + (corAtiva === 'TODAS' ? '' : ' · pulseira ' + corAtiva);
+
+      document.getElementById('rankingPalcos').innerHTML = palcos.map((p, i) => {
+        const share = totalIng ? p.ingressos / totalIng * 100 : 0;
+        const largura = p.ingressos / maxIng * 100;
+        const classes = ['hbar'];
+        if (i === 0 && p.ingressos > 0) classes.push('lider');
+        if (p.chave === palcoAtivo) classes.push('is-selected');
+        const valor = p.ingressos > 0
+          ? '<span class="valor">' + int(p.ingressos) + '</span>'
+          : '<span class="valor zero">sem show</span>';
+        return '<button class="' + classes.join(' ') + '" role="listitem" data-palco="'
+          + esc(p.chave) + '" aria-pressed="' + (p.chave === palcoAtivo) + '">'
+          + '<span class="nome">' + esc(p.chave) + '</span>'
+          + '<span class="trilha"><span class="fill" style="width:' + um(largura) + '%"></span></span>'
+          + valor + '</button>';
+      }).join('');
+
+      document.getElementById('rankingPalcos').querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => { palcoAtivo = b.dataset.palco; renderAto1(); });
+      });
+
+      const lider = palcos[0];
+      const shareLider = totalIng ? lider.ingressos / totalIng * 100 : 0;
+      const shareApres = filtradas().length ? lider.apres / filtradas().length * 100 : 0;
+      document.getElementById('rankingNota').textContent = lider.ingressos === 0
+        ? 'Nenhuma apresentação de pulseira ' + corAtiva + ' nos palcos listados.'
+        : lider.chave + ' concentra ' + um(shareLider) + '% dos ingressos com '
+          + um(shareApres) + '% das apresentações' + (corAtiva === 'TODAS' ? '' : ' de pulseira ' + corAtiva)
+          + '. Clique num palco para abrir o detalhe.';
+      document.getElementById('ato1Selo').textContent =
+        D.palcos.length + ' palcos · ' + filtradas().length + ' apresentações no filtro';
+    }
+
+    function renderPulseiras(){
+      const grupos = agruparPor(A, 'cor');
+      const linhas = D.cores.map(c => grupos.get(c)).filter(Boolean)
+                            .sort((a,b) => b.ingressos - a.ingressos);
+      const maxIng = Math.max.apply(null, linhas.map(l => l.ingressos).concat([1]));
+      const total = soma(A,'ingressos');
+
+      document.getElementById('pulseiraLabel').textContent =
+        'Ingressos e receita por cor de pulseira · evento inteiro';
+      document.getElementById('rankingPulseiras').innerHTML = linhas.map(l => {
+        const ativa = l.chave === corAtiva ? ' is-selected' : '';
+        return '<button class="hbar' + ativa + '" role="listitem" data-cor="' + esc(l.chave) + '"'
+          + ' aria-pressed="' + (l.chave === corAtiva) + '">'
+          + '<span class="nome"><span class="chip"><i style="background:' + corVar(l.chave)
+          + '"></i>' + esc(l.chave) + '</span></span>'
+          + '<span class="trilha"><span class="fill" style="width:'
+          + um(l.ingressos / maxIng * 100) + '%;background:linear-gradient(90deg,'
+          + corVar(l.chave) + ',' + corVar(l.chave) + ')"></span></span>'
+          + '<span class="valor">' + int(l.ingressos) + '</span></button>';
+      }).join('');
+      document.getElementById('rankingPulseiras').querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => { corAtiva = b.dataset.cor; renderAto1(); });
+      });
+
+      const top = linhas[0], fundo = linhas[linhas.length - 1];
+      document.getElementById('pulseiraNota').textContent =
+        top.chave + ' lidera em volume com ' + int(top.ingressos) + ' ingressos ('
+        + um(top.ingressos / total * 100) + '%), mas rende ' + dinheiro(top.rec_ing / top.ingressos)
+        + ' por ingresso, contra ' + dinheiro(fundo.rec_ing / fundo.ingressos) + ' da '
+        + fundo.chave + ' — a pulseira mais alta vende menos e vale mais. Clique numa cor para filtrar o ranking acima.';
+    }
+
+    function renderDrilldown(){
+      const rows = filtradas().filter(a => a.palco === palcoAtivo);
+      const idx = D.palcos.indexOf(palcoAtivo);
+      document.getElementById('drillKicker').textContent = String(idx + 1).padStart(2,'0');
+      document.getElementById('drillNome').textContent = palcoAtivo;
+
+      if (!rows.length){
+        document.getElementById('drillKv').innerHTML =
+          '<dt>Apresentações</dt><dd>0</dd>';
+        document.getElementById('drillAtracoes').innerHTML =
+          '<p class="note">Nenhuma apresentação de pulseira ' + esc(corAtiva)
+          + ' neste palco. Troque a pulseira ou escolha outro palco.</p>';
+        return;
+      }
+
+      const g = agruparPor(rows,'palco').get(palcoAtivo);
+      document.getElementById('drillKv').innerHTML = [
+        ['Apresentações', int(g.apres)],
+        ['Ingressos', int(g.ingressos)],
+        ['Check-ins', int(g.checkins)],
+        ['Receita total', dinheiro(g.receita)],
+        ['— ingressos', dinheiro(g.rec_ing)],
+        ['— alim. e bebidas', dinheiro(g.rec_ab)],
+        ['— merch', dinheiro(g.rec_merch)],
+        ['Ocupação média', pct(g.ocupacao)],
+        ['Nota do público', dois(g.nota) + '/10']
+      ].map(([k,v]) => '<dt>' + k + '</dt><dd>' + v + '</dd>').join('');
+
+      const artistas = [...agruparPor(rows,'artista').values()]
+        .sort((a,b) => b.checkins - a.checkins).slice(0,5);
+      document.getElementById('drillAtracoes').innerHTML =
+        '<table class="mini-table"><thead><tr><th></th><th>Artista</th><th style="text-align:right">Público</th></tr></thead><tbody>'
+        + artistas.map((a,i) => {
+            const melhor = a.linhas.slice().sort((x,y) => y.checkins - x.checkins)[0];
+            return '<tr><td class="rank">' + (i+1) + '</td><td>' + esc(a.chave)
+              + '<span class="sub">' + esc(melhor.faixa) + ' · nota ' + dois(a.nota) + '</span></td>'
+              + '<td class="num">' + int(a.checkins) + '</td></tr>';
+          }).join('')
+        + '</tbody></table>';
+    }
+
+    function renderAto1(){
+      renderFiltro();
+      renderRankingPalcos();
+      renderPulseiras();
+      renderDrilldown();
+      document.getElementById('ato1Lede').innerHTML =
+        'O ranking abaixo responde <b>qual palco vendeu mais ingressos</b>. Filtre por cor de '
+        + 'pulseira para ver a composição da venda, e clique num palco para abrir receita e '
+        + 'principais atrações.';
+    }
+
+    /* ---------- ato 2: artistas ---------- */
+    function renderAto2(){
+      const grupos = [...agruparPor(A,'artista').values()];
+      const porTotal = grupos.slice().sort((a,b) => b.checkins - a.checkins);
+      const porMedia = grupos.slice().sort((a,b) => b.media_show - a.media_show);
+      const top3 = porTotal.slice(0,3);
+
+      document.getElementById('ato2Selo').textContent =
+        grupos.length + ' artistas · ranking por check-ins somados';
+      document.getElementById('ato2Lede').innerHTML =
+        'Público aqui é <b>check-in</b>: gente que efetivamente entrou, não ingresso emitido. '
+        + 'Somando todas as apresentações de cada artista, o pódio é este.';
+
+      document.getElementById('podio').innerHTML = top3.map((a,i) => {
+        const melhor = a.linhas.slice().sort((x,y) => y.checkins - x.checkins)[0];
+        return '<article class="pos p' + (i+1) + '">'
+          + '<div class="lugar">' + (i+1) + 'º lugar</div>'
+          + '<h3>' + esc(a.chave) + '</h3>'
+          + '<div class="publico">' + int(a.checkins) + '<small> check-ins</small></div>'
+          + '<div class="faixa">' + a.apres + ' apresentações · média de ' + int(a.media_show)
+          + ' por show<br/>Maior público com <b>' + esc(melhor.faixa) + '</b> no '
+          + esc(melhor.palco) + '</div></article>';
+      }).join('');
+
+      const primeiro = porTotal[0], campeaoMedia = porMedia[0];
+      document.getElementById('ressalvaTexto').textContent =
+        primeiro.chave + ' lidera em volume, mas com ' + primeiro.apres + ' apresentações contra '
+        + campeaoMedia.apres + ' de ' + campeaoMedia.chave + '. Dividindo pelo número de shows, o '
+        + 'pódio muda inteiro: quem enche mais uma casa não é quem soma mais no total. As duas '
+        + 'leituras estão certas — a pergunta é qual delas você quer responder.';
+      document.getElementById('tabelaMedia').innerHTML =
+        '<thead><tr><th></th><th>Artista</th><th style="text-align:right">Média por show</th>'
+        + '<th style="text-align:right">Shows</th><th style="text-align:right">Total</th></tr></thead><tbody>'
+        + porMedia.slice(0,3).map((a,i) =>
+            '<tr><td class="rank">' + (i+1) + '</td><td>' + esc(a.chave) + '</td>'
+            + '<td class="num">' + int(a.media_show) + '</td>'
+            + '<td class="num">' + a.apres + '</td>'
+            + '<td class="num">' + int(a.checkins) + '</td></tr>').join('')
+        + '</tbody></table>';
+    }
+
+    /* ---------- ato 3: músicas ---------- */
+    function renderAto3(){
+      const grupos = [...agruparPor(A,'faixa').values()];
+      const N = 6;
+      /* Desempate: notas medias iguais na tela (2 casas) tem de desempatar por
+         publico, e nao pelo ruido de ponto flutuante da media -- sem arredondar
+         antes, 9.0666666666666 e 9.0666666666668 viram ordem inexplicavel. */
+      const cmpNota = (a,b) => Math.round(b.nota * 100) - Math.round(a.nota * 100);
+      const amadas = grupos.slice().sort((a,b) => cmpNota(a,b) || b.checkins - a.checkins).slice(0,N);
+      const lotadas = grupos.slice().sort((a,b) => b.checkins - a.checkins).slice(0,N);
+      const nasDuas = new Set(amadas.map(a => a.chave).filter(k => lotadas.some(l => l.chave === k)));
+
+      document.getElementById('ato3Selo').textContent =
+        grupos.length + ' faixas · top ' + N + ' em cada leitura';
+      document.getElementById('ato3Lede').innerHTML =
+        '"Queridinha" tem duas leituras que <b>discordam</b>: a faixa mais bem avaliada não é a '
+        + 'que levou mais gente. Em vez de escolher uma e esconder a outra, as duas estão aqui. '
+        + '(Frequência de execução não entra: toda faixa tocou 2 ou 3 vezes, então não distingue nada.)';
+
+      const artistaDa = g => g.linhas[0].artista;
+      const monta = (lista, valor, rotulo) =>
+        '<thead><tr><th></th><th>Faixa</th><th style="text-align:right">' + rotulo + '</th></tr></thead><tbody>'
+        + lista.map((g,i) =>
+            '<tr class="' + (nasDuas.has(g.chave) ? 'destaque' : '') + '">'
+            + '<td class="rank">' + (i+1) + '</td>'
+            + '<td>' + (nasDuas.has(g.chave) ? '<span class="marca">◆ </span>' : '')
+            + esc(g.chave) + '<span class="sub">' + esc(artistaDa(g)) + '</span></td>'
+            + '<td class="num">' + valor(g) + '</td></tr>').join('')
+        + '</tbody>';
+
+      document.getElementById('tabelaAmadas').innerHTML =
+        monta(amadas, g => dois(g.nota), 'Nota');
+      document.getElementById('tabelaLotadas').innerHTML =
+        monta(lotadas, g => int(g.checkins), 'Check-ins');
+
+      const nomes = [...nasDuas];
+      const topAmada = amadas[0], topLotada = lotadas[0];
+      document.getElementById('cruzamentoTitulo').textContent = nomes.length
+        ? nomes.join(' · ')
+        : 'Nenhuma faixa nas duas listas';
+      document.getElementById('cruzamentoTexto').textContent = nomes.length
+        ? 'Só ' + (nomes.length === 1 ? 'esta faixa aparece' : 'estas faixas aparecem')
+          + ' nos dois top ' + N + ' — nota alta e plateia cheia ao mesmo tempo. Para comparar: '
+          + topAmada.chave + ' tem a melhor nota (' + dois(topAmada.nota) + ') com '
+          + int(topAmada.checkins) + ' check-ins, enquanto ' + topLotada.chave + ' levou '
+          + int(topLotada.checkins) + ' pessoas com nota ' + dois(topLotada.nota) + '.'
+        : 'As duas leituras não têm interseção no top ' + N + ': o que o público mais elogiou não '
+          + 'foi o que ele mais assistiu.';
+    }
+
+    /* ---------- procedência ---------- */
+    function renderProcedencia(){
+      const p = D.procedencia;
+      document.getElementById('procTexto').innerHTML =
+        'Todos os números desta página são calculados no navegador a partir das ' + p.registros
+        + ' apresentações de <a href="../' + esc(p.base) + '">' + esc(p.base)
+        + '</a>, projetadas pelo script <a href="../' + esc(p.script) + '">' + esc(p.script)
+        + '</a>. Página gerada em ' + esc(p.gerado_em) + ' — não editar à mão. '
+        + 'Os registros da base são sintéticos.';
+      const d = p.derivados || {};
+      const partes = Object.keys(d).map(k => k + ' (' + d[k] + ')');
+      document.getElementById('procDerivados').innerHTML = partes.length
+        ? 'Valores calculados na higienização, não lidos do arquivo original: ' + partes.join(', ')
+          + '. Detalhe em <a href="../' + esc(p.qa) + '">' + esc(p.qa) + '</a>.'
+        : '';
+    }
+
+    /* ---------- navegação por âncora ---------- */
+    function ligarTabs(){
+      const tabs = [...document.querySelectorAll('nav.tabs .tab')];
+      tabs.forEach(t => t.addEventListener('click', () => {
+        tabs.forEach(o => o.classList.remove('active'));
+        t.classList.add('active');
+      }));
+    }
+
+    renderAbertura();
+    renderAto1();
+    renderAto2();
+    renderAto3();
+    renderProcedencia();
+    ligarTabs();
+  })();
+  </script>
+</body>
+</html>

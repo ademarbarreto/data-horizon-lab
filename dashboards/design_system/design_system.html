@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon Dashboard UI System</title>
+  <style>
+    :root{
+      --bg:#11161d;
+      --bg-2:#1a222c;
+      --panel:#f4f6f8;
+      --panel-2:#ffffff;
+      --ink:#131a22;
+      --muted:#77808b;
+      --line:#dfe4e8;
+      --cyan:#00c9c8;
+      --cyan-2:#00a6a7;
+      --orange:#ff5b1a;
+      --magenta:#ff1478;
+      --yellow:#ffc928;
+      --green:#27c57a;
+      --danger:#eb344d;
+      --shadow:0 16px 40px rgba(0,0,0,.22);
+      --radius:2px;
+      --radius-soft:10px;
+      --speed:240ms;
+      --ease:cubic-bezier(.2,.8,.2,1);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:#fff;
+      font-family:Segoe UI, Inter, Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0/28px 28px,
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px) 0 0/28px 28px,
+        radial-gradient(circle at 18% 0%, rgba(0,201,200,.15), transparent 34%),
+        radial-gradient(circle at 90% 25%, rgba(255,20,120,.1), transparent 28%),
+        linear-gradient(160deg,var(--bg),#0d1218 70%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background:linear-gradient(120deg, transparent 0 44%, rgba(255,255,255,.025) 45% 46%, transparent 47%);
+      opacity:.55;
+      z-index:0;
+    }
+
+    .shell{position:relative; z-index:1; width:min(1480px,calc(100% - 36px)); margin:0 auto; padding:24px 0 72px}
+    .topbar{
+      height:48px; display:flex; align-items:center; gap:14px;
+      color:#cbd3db; font-size:12px; text-transform:uppercase; letter-spacing:.08em;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      margin-bottom:14px;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;color:#fff;letter-spacing:.04em}
+    .brand-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--magenta));clip-path:polygon(0 18%,100% 0,82% 42%,100% 58%,0 100%,18% 56%)}
+    .spacer{flex:1}
+    .credit{padding:7px 10px;background:#fff;color:#111;font-weight:800}
+    .level{display:inline-flex;align-items:center;gap:7px}
+    .level b{background:var(--yellow);color:#171717;padding:5px 8px}
+
+    .tabs{
+      display:flex; gap:2px; align-items:end; overflow:auto;
+      background:#e7eaed; color:#6e7580; padding:0 4px;
+      box-shadow:var(--shadow);
+    }
+    .tab{
+      border:0;background:transparent;color:inherit;padding:11px 14px;
+      font:700 11px/1 Segoe UI, sans-serif;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+      transition:all var(--speed) var(--ease);
+    }
+    .tab:hover{background:#fff;color:#222}
+    .tab.active{background:#fff;color:var(--orange);box-shadow:inset 0 -3px var(--orange)}
+
+    .page-title{
+      display:flex; align-items:end; justify-content:space-between; gap:18px;
+      margin:34px 0 18px;
+    }
+    .eyebrow{color:var(--cyan);font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.16em}
+    h1{margin:5px 0 0;font-size:clamp(34px,4vw,60px);line-height:.92;text-transform:uppercase;letter-spacing:-.04em}
+    .page-title p{max-width:560px;color:#9aa5b0;line-height:1.5;margin:0}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .card{
+      position:relative; background:var(--panel); color:var(--ink);
+      min-height:130px; padding:18px; overflow:hidden; box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.6);
+      transition:transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease), border-color var(--speed) var(--ease);
+    }
+    .card:hover{transform:translateY(-3px);box-shadow:0 24px 52px rgba(0,0,0,.3)}
+    .card.selectable{cursor:pointer}
+    .card.selectable:after{
+      content:"";position:absolute;inset:0;border:0 solid var(--orange);pointer-events:none;
+      transition:border-width var(--speed) var(--ease);
+    }
+    .card.selectable:hover:after,.card.selectable.is-selected:after{border-width:3px}
+    .card.selectable.is-selected{transform:scale(1.012)}
+    .card.cyan{background:var(--cyan);color:#032c2e}
+    .card.dark{background:#17202a;color:#f8fafb;border-color:#27323e}
+    .card.magenta{background:linear-gradient(135deg,#a50750,var(--magenta));color:#fff}
+    .card.hero{min-height:330px;background:
+      linear-gradient(180deg,rgba(9,18,26,.08),rgba(9,18,26,.72)),
+      radial-gradient(circle at 70% 20%,rgba(0,201,200,.55),transparent 22%),
+      linear-gradient(135deg,#30424a,#111820 58%,#29323b);color:#fff}
+    .card.hero:before{
+      content:"";position:absolute;inset:-20% -10%;opacity:.34;
+      background:
+        repeating-linear-gradient(120deg, transparent 0 42px, rgba(255,255,255,.08) 43px 45px, transparent 46px 78px);
+      transform:rotate(-7deg);
+    }
+
+    .span-3{grid-column:span 3}
+    .span-4{grid-column:span 4}
+    .span-5{grid-column:span 5}
+    .span-6{grid-column:span 6}
+    .span-7{grid-column:span 7}
+    .span-8{grid-column:span 8}
+    .span-12{grid-column:span 12}
+
+    .card-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--muted)}
+    .dark .card-label,.hero .card-label,.magenta .card-label{color:#c8d2db}
+    .metric{font-size:46px;font-weight:900;letter-spacing:-.045em;margin-top:8px}
+    .metric small{font-size:18px;color:var(--muted);letter-spacing:0}
+    .metric-row{display:flex;align-items:end;justify-content:space-between;gap:10px}
+    .trend{font-size:12px;font-weight:800;padding:5px 8px;background:#dff7eb;color:#0e8f54}
+    .trend.down{background:#ffe2e7;color:#c21f3d}
+
+    .kicker{
+      position:absolute;right:16px;top:15px;font-size:56px;font-weight:900;opacity:.08;line-height:1;
+      letter-spacing:-.07em;
+    }
+
+    .hero-copy{position:absolute;left:22px;bottom:22px;z-index:2}
+    .hero-copy h2{font-size:34px;line-height:.95;margin:8px 0;text-transform:uppercase;letter-spacing:-.04em}
+    .hero-copy p{margin:0;color:#c8d3dc;font-size:13px}
+    .hero-chip{display:inline-flex;gap:7px;align-items:center;background:rgba(0,0,0,.35);padding:6px 9px;font-size:11px;text-transform:uppercase}
+    .hero-dot{width:8px;height:8px;background:var(--orange);border-radius:50%;box-shadow:0 0 0 4px rgba(255,91,26,.18)}
+
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .btn{
+      appearance:none;border:0;cursor:pointer;font:800 12px Segoe UI,sans-serif;text-transform:uppercase;
+      letter-spacing:.035em;padding:11px 16px;background:#fff;color:#111;
+      box-shadow:0 6px 14px rgba(0,0,0,.14);
+      transition:transform var(--speed) var(--ease), filter var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+    }
+    .btn:hover{transform:translateY(-2px);filter:brightness(1.04);box-shadow:0 10px 18px rgba(0,0,0,.2)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--cyan);color:#073235}
+    .btn.orange{background:var(--orange);color:#fff}
+    .btn.ghost{background:transparent;color:#d9e0e6;border:1px solid #495762;box-shadow:none}
+
+    .section{
+      margin-top:42px;
+    }
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .section-head h2{font-size:19px;margin:0;text-transform:uppercase;letter-spacing:.02em}
+    .section-head span{font-size:11px;color:#77838f;text-transform:uppercase;letter-spacing:.12em}
+
+    .chart-wrap{height:250px;margin-top:10px;position:relative}
+    .chart-grid{
+      position:absolute;inset:0;
+      background:repeating-linear-gradient(to top,transparent 0 calc(25% - 1px),#e6eaed calc(25% - 1px) 25%);
+    }
+    .line-chart{position:absolute;inset:10px 0 0;width:100%;height:205px}
+    .line-path{fill:none;stroke:var(--cyan-2);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 6px 4px rgba(0,166,167,.15));stroke-dasharray:700;stroke-dashoffset:700;animation:draw 1.25s .15s var(--ease) forwards}
+    .line-area{fill:url(#areaGradient);opacity:.52}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    .chart-foot{display:flex;justify-content:space-between;color:#8a949d;font-size:10px;text-transform:uppercase}
+
+    .bar-group{display:flex;align-items:end;gap:9px;height:180px;padding:12px 8px 0}
+    .bar{
+      flex:1;min-width:10px;background:linear-gradient(to top,var(--cyan-2),var(--cyan));
+      transform-origin:bottom;transform:scaleY(0);animation:barRise .7s var(--ease) forwards;
+    }
+    .bar:nth-child(2){animation-delay:.05s}.bar:nth-child(3){animation-delay:.1s}.bar:nth-child(4){animation-delay:.15s}
+    .bar:nth-child(5){animation-delay:.2s}.bar:nth-child(6){animation-delay:.25s}.bar:nth-child(7){animation-delay:.3s}
+    @keyframes barRise{to{transform:scaleY(1)}}
+
+    .donut-wrap{display:flex;align-items:center;justify-content:center;gap:28px;min-height:215px}
+    .donut{
+      --p:72;
+      width:150px;aspect-ratio:1;border-radius:50%;
+      background:conic-gradient(var(--orange) calc(var(--p)*1%),#dfe4e8 0);
+      display:grid;place-items:center;position:relative;
+      animation:pop .55s var(--ease);
+    }
+    .donut:after{content:"";width:102px;aspect-ratio:1;border-radius:50%;background:#fff;position:absolute}
+    .donut strong{z-index:1;font-size:32px}
+    @keyframes pop{from{transform:scale(.86);opacity:0}to{transform:scale(1);opacity:1}}
+    .legend{display:grid;gap:9px;font-size:12px}
+    .legend span{display:flex;align-items:center;gap:8px}
+    .legend i{width:10px;height:10px;background:var(--orange)}
+    .legend span:nth-child(2) i{background:#ccd3d9}
+    .legend span:nth-child(3) i{background:var(--cyan)}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .mini-table th,.mini-table td{padding:11px 10px;border-top:1px solid #e2e6e9;text-align:left}
+    .mini-table th{font-size:10px;color:#87919a;text-transform:uppercase;letter-spacing:.08em}
+    .status{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+    .status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+    .status.warn:before{background:var(--yellow)}
+
+    .icon-card{display:flex;align-items:center;gap:14px;min-height:92px}
+    .icon{
+      width:45px;height:45px;display:grid;place-items:center;font-size:23px;font-weight:900;color:#fff;
+      background:var(--orange);clip-path:polygon(12% 0,100% 0,88% 100%,0 100%);
+    }
+    .icon-card h3{margin:0;font-size:14px;text-transform:uppercase}
+    .icon-card p{margin:3px 0 0;color:#7f8992;font-size:11px}
+
+    .motion-demo{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:22px;background:#0e141b;border:1px solid #27323c;
+    }
+    .motion-tile{
+      width:110px;height:72px;background:#fff;color:#111;display:grid;place-items:center;
+      font-size:11px;font-weight:900;text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;
+    }
+    .motion-tile.slide:after{content:"";position:absolute;inset:0;background:var(--cyan);transform:translateX(-101%);transition:transform .35s var(--ease)}
+    .motion-tile.slide:hover:after{transform:translateX(0)}
+    .motion-tile.slide span{position:relative;z-index:1}
+    .motion-tile.slide:hover span{color:#073235}
+    .motion-tile.tilt:hover{transform:perspective(500px) rotateX(8deg) rotateY(-8deg) translateY(-3px)}
+    .motion-tile.pulse:hover{animation:pulse .7s}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+    .toast-stack{position:fixed;right:22px;bottom:22px;z-index:40;display:grid;gap:10px;width:min(360px,calc(100vw - 44px))}
+    .toast{
+      background:#fff;color:#111;padding:14px 16px;box-shadow:0 20px 48px rgba(0,0,0,.35);
+      display:grid;grid-template-columns:8px 1fr auto;gap:12px;align-items:start;
+      transform:translateX(120%);opacity:0;animation:toastIn .38s var(--ease) forwards;
+    }
+    .toast .rail{width:8px;height:100%;min-height:42px;background:var(--cyan)}
+    .toast.warn .rail{background:var(--orange)}
+    .toast.danger .rail{background:var(--danger)}
+    .toast strong{display:block;font-size:12px;text-transform:uppercase}
+    .toast p{margin:3px 0 0;font-size:11px;color:#6d7780;line-height:1.35}
+    .toast button{border:0;background:transparent;cursor:pointer;font-size:18px}
+    @keyframes toastIn{to{transform:translateX(0);opacity:1}}
+
+    .palette{display:flex;gap:8px;flex-wrap:wrap}
+    .swatch{width:92px;height:78px;padding:10px;font-size:10px;font-weight:800;display:flex;align-items:end;box-shadow:var(--shadow)}
+    .swatch.light{color:#111}
+
+    .tokens{
+      background:#0d141b;border:1px solid #27313b;color:#c8d2db;padding:18px;overflow:auto;
+      font:12px/1.7 Consolas, monospace;
+    }
+    .tokens b{color:var(--cyan)}
+
+    .footer{margin-top:54px;padding-top:18px;border-top:1px solid rgba(255,255,255,.09);display:flex;justify-content:space-between;gap:16px;color:#7e8993;font-size:11px}
+    .badge{display:inline-flex;align-items:center;gap:7px;background:#1d2731;color:#c8d0d7;padding:6px 8px}
+
+    @media (max-width:1100px){
+      .span-3{grid-column:span 6}.span-4{grid-column:span 6}.span-5,.span-7,.span-8{grid-column:span 12}
+    }
+    @media (max-width:700px){
+      .shell{width:min(100% - 20px,1480px)}
+      .page-title{align-items:start;flex-direction:column}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}
+      h1{font-size:40px}
+      .metric{font-size:38px}
+      .topbar{font-size:9px}
+      .credit{display:none}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand"><span class="brand-mark"></span>Horizon Dashboard System</div>
+      <div class="level"><b>LV 18</b> DESIGN KIT</div>
+      <div class="spacer"></div>
+      <div>UI / Analytics</div>
+      <div class="credit">CR 143,358</div>
+    </div>
+
+    <nav class="tabs" aria-label="Seções">
+      <button class="tab active">Overview</button>
+      <button class="tab">KPI Cards</button>
+      <button class="tab">Charts</button>
+      <button class="tab">Actions</button>
+      <button class="tab">Motion</button>
+      <button class="tab">Tokens</button>
+    </nav>
+
+    <header class="page-title">
+      <div>
+        <div class="eyebrow">Dashboard UI Kit / High Motion</div>
+        <h1>Visual System</h1>
+      </div>
+      <p>
+        Biblioteca visual inspirada na linguagem modular de menus automotivos: painéis brancos, acentos ciano,
+        seleção laranja, contraste alto, hierarquia tipográfica condensada, cards mosaico e microinterações rápidas.
+      </p>
+    </header>
+
+    <section class="grid">
+      <article class="card hero selectable span-7 is-selected">
+        <div class="hero-copy">
+          <span class="hero-chip"><i class="hero-dot"></i> Live dashboard</span>
+          <h2>Performance<br/>World Map</h2>
+          <p>Visão executiva com foco no item selecionado e contexto periférico.</p>
+          <div class="actions">
+            <button class="btn primary" onclick="showToast('success')">Open report</button>
+            <button class="btn ghost">Compare</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card cyan selectable span-5">
+        <span class="kicker">01</span>
+        <div class="card-label">Current Score</div>
+        <div class="metric-row">
+          <div class="metric">92.8<small>%</small></div>
+          <span class="trend">▲ 8.4%</span>
+        </div>
+        <div style="margin-top:18px;font-size:12px;line-height:1.5;max-width:370px">
+          Accent card para KPI principal, ótimo para taxa, SLA, conversão e NPS.
+        </div>
+      </article>
+
+      <article class="card selectable span-3">
+        <span class="kicker">CR</span>
+        <div class="card-label">Revenue</div>
+        <div class="metric">$1.28<small>M</small></div>
+        <div class="trend" style="display:inline-block;margin-top:8px">▲ 12.3%</div>
+      </article>
+      <article class="card selectable span-3">
+        <span class="kicker">CX</span>
+        <div class="card-label">Satisfaction</div>
+        <div class="metric">8.9<small>/10</small></div>
+        <div class="trend" style="display:inline-block;margin-top:8px">▲ 0.7</div>
+      </article>
+      <article class="card selectable span-3">
+        <span class="kicker">NO</span>
+        <div class="card-label">No-show</div>
+        <div class="metric">6.1<small>%</small></div>
+        <div class="trend down" style="display:inline-block;margin-top:8px">▼ 1.2%</div>
+      </article>
+      <article class="card magenta selectable span-3">
+        <span class="kicker">AL</span>
+        <div class="card-label">Alerts</div>
+        <div class="metric">04</div>
+        <div style="font-size:11px;margin-top:8px;opacity:.9">2 high priority</div>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Charts</h2><span>Data Visualization Language</span></div>
+      <div class="grid">
+        <article class="card span-8">
+          <div class="card-label">Performance / 7 days</div>
+          <div class="chart-wrap">
+            <div class="chart-grid"></div>
+            <svg class="line-chart" viewBox="0 0 700 210" preserveAspectRatio="none" aria-label="Gráfico de linha">
+              <defs>
+                <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00c9c8" stop-opacity=".45"/>
+                  <stop offset="100%" stop-color="#00c9c8" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path class="line-area" d="M0,170 C80,155 90,120 150,130 S250,80 310,98 S410,150 470,92 S580,55 700,28 L700,210 L0,210 Z"/>
+              <path class="line-path" d="M0,170 C80,155 90,120 150,130 S250,80 310,98 S410,150 470,92 S580,55 700,28"/>
+            </svg>
+          </div>
+          <div class="chart-foot"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        </article>
+
+        <article class="card span-4">
+          <div class="card-label">Occupancy</div>
+          <div class="donut-wrap">
+            <div class="donut" style="--p:72"><strong>72%</strong></div>
+            <div class="legend">
+              <span><i></i> Occupied</span>
+              <span><i></i> Available</span>
+              <span><i></i> Target</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card span-6">
+          <div class="card-label">Volume by period</div>
+          <div class="bar-group">
+            <div class="bar" style="height:42%"></div>
+            <div class="bar" style="height:58%"></div>
+            <div class="bar" style="height:35%"></div>
+            <div class="bar" style="height:77%"></div>
+            <div class="bar" style="height:63%"></div>
+            <div class="bar" style="height:92%"></div>
+            <div class="bar" style="height:70%"></div>
+          </div>
+          <div class="chart-foot"><span>08h</span><span>10h</span><span>12h</span><span>14h</span><span>16h</span><span>18h</span><span>20h</span></div>
+        </article>
+
+        <article class="card dark span-6">
+          <div class="card-label">Operational feed</div>
+          <table class="mini-table" style="color:#dbe2e8">
+            <thead><tr><th>Metric</th><th>Status</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Check-ins</td><td><span class="status">Healthy</span></td><td>18,420</td></tr>
+              <tr><td>Queue time</td><td><span class="status warn">Attention</span></td><td>06:12</td></tr>
+              <tr><td>Revenue/hr</td><td><span class="status">Healthy</span></td><td>$84.2k</td></tr>
+              <tr><td>Incidents</td><td><span class="status warn">Watch</span></td><td>04</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Action Cards & Buttons</h2><span>Navigation / Actions</span></div>
+      <div class="grid">
+        <article class="card icon-card selectable span-3"><div class="icon">⚙</div><div><h3>Settings</h3><p>Configuração de módulos</p></div></article>
+        <article class="card icon-card selectable span-3"><div class="icon" style="background:var(--cyan)">⌁</div><div><h3>Explore</h3><p>Entrar em visão analítica</p></div></article>
+        <article class="card icon-card selectable span-3"><div class="icon" style="background:var(--magenta)">✉</div><div><h3>Messages</h3><p>Central de notificações</p></div></article>
+        <article class="card icon-card selectable span-3"><div class="icon" style="background:var(--green)">✓</div><div><h3>Approve</h3><p>Ação primária de fluxo</p></div></article>
+
+        <article class="card span-12">
+          <div class="card-label">Button Matrix</div>
+          <div class="actions" style="margin-top:18px">
+            <button class="btn primary" onclick="showToast('success')">Primary Action</button>
+            <button class="btn orange" onclick="showToast('warning')">Selected / Focus</button>
+            <button class="btn" onclick="showToast('default')">Secondary</button>
+            <button class="btn ghost" style="color:#111;border-color:#bfc6cc">Ghost</button>
+            <button class="btn" disabled style="opacity:.35;cursor:not-allowed">Disabled</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Motion Language</h2><span>Fast / Snappy / Layered</span></div>
+      <div class="motion-demo">
+        <div class="motion-tile slide"><span>Slide Fill</span></div>
+        <div class="motion-tile tilt">Tilt Focus</div>
+        <div class="motion-tile pulse">Pulse</div>
+        <div class="motion-tile" onclick="showToast('default')">Toast</div>
+        <div class="motion-tile" onclick="selectRandomCard()">Focus Jump</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Palette & Tokens</h2><span>Reusable Dashboard Foundation</span></div>
+      <div class="grid">
+        <article class="card span-6">
+          <div class="card-label" style="margin-bottom:14px">Palette</div>
+          <div class="palette">
+            <div class="swatch light" style="background:#ffffff">#FFFFFF</div>
+            <div class="swatch light" style="background:#00c9c8">#00C9C8</div>
+            <div class="swatch light" style="background:#ff5b1a">#FF5B1A</div>
+            <div class="swatch" style="background:#ff1478">#FF1478</div>
+            <div class="swatch" style="background:#17202a">#17202A</div>
+          </div>
+        </article>
+        <article class="span-6 tokens">
+<pre><b>:root</b> {
+  --panel: #f4f6f8;
+  --ink: #131a22;
+  --cyan: #00c9c8;
+  --orange: #ff5b1a;
+  --magenta: #ff1478;
+  --radius: 2px;
+  --speed: 240ms;
+  --ease: cubic-bezier(.2,.8,.2,1);
+}</pre>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>Dashboard design system inspirado em UI modular automotiva e cards de navegação.</div>
+      <span class="badge">RESPONSIVE · ACCESSIBLE · NO LIBS</span>
+    </footer>
+  </div>
+
+  <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+  <script>
+    document.querySelectorAll('.tab').forEach(tab=>{
+      tab.addEventListener('click',()=>{
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+      })
+    });
+
+    document.querySelectorAll('.selectable').forEach(card=>{
+      card.addEventListener('click',e=>{
+        if(e.target.closest('button')) return;
+        document.querySelectorAll('.selectable').forEach(c=>c.classList.remove('is-selected'));
+        card.classList.add('is-selected');
+      })
+    });
+
+    const toastData = {
+      success:['Dashboard updated','All modules were refreshed successfully.'],
+      warning:['Attention required','One metric is outside the expected range.'],
+      default:['Quick message','This is the default informational toast.']
+    };
+
+    function showToast(type='default'){
+      const [title,msg]=toastData[type] || toastData.default;
+      const toast=document.createElement('div');
+      toast.className='toast '+(type==='warning'?'warn':'');
+      toast.innerHTML='<div class="rail"></div><div><strong>'+title+'</strong><p>'+msg+'</p></div><button aria-label="Fechar">×</button>';
+      document.getElementById('toastStack').appendChild(toast);
+      toast.querySelector('button').onclick=()=>toast.remove();
+      setTimeout(()=>toast.remove(),4200);
+    }
+
+    function selectRandomCard(){
+      const cards=[...document.querySelectorAll('.selectable')];
+      cards.forEach(c=>c.classList.remove('is-selected'));
+      const pick=cards[Math.floor(Math.random()*cards.length)];
+      pick.classList.add('is-selected');
+      pick.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+  </script>
+</body>
+</html>

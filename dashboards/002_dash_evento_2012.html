@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon Festival 2012 — Evento Musical</title>
+  <style>
+    /* Tokens do design system do projeto (dashboards/design_system/design_system.html) */
+    :root{
+      --bg:#11161d;
+      --bg-2:#1a222c;
+      --panel:#f4f6f8;
+      --panel-2:#ffffff;
+      --ink:#131a22;
+      --muted:#77808b;
+      --line:#dfe4e8;
+      --cyan:#00c9c8;
+      --cyan-2:#00a6a7;
+      --orange:#ff5b1a;
+      --magenta:#ff1478;
+      --yellow:#ffc928;
+      --green:#27c57a;
+      --danger:#eb344d;
+      --shadow:0 16px 40px rgba(0,0,0,.22);
+      --radius:2px;
+      --speed:240ms;
+      --ease:cubic-bezier(.2,.8,.2,1);
+
+      /* Extensao: as 7 pulseiras da base precisam de identidade propria */
+      --p-yellow:#ffc928;
+      --p-green:#27c57a;
+      --p-blue:#2f9bff;
+      --p-pink:#ff1478;
+      --p-orange:#ff5b1a;
+      --p-purple:#8b5cf6;
+      --p-gold:#c9962b;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:#fff;
+      font-family:Segoe UI, Inter, Arial, sans-serif;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0/28px 28px,
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px) 0 0/28px 28px,
+        radial-gradient(circle at 18% 0%, rgba(0,201,200,.15), transparent 34%),
+        radial-gradient(circle at 90% 25%, rgba(255,20,120,.1), transparent 28%),
+        linear-gradient(160deg,var(--bg),#0d1218 70%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;
+      background:linear-gradient(120deg, transparent 0 44%, rgba(255,255,255,.025) 45% 46%, transparent 47%);
+      opacity:.55;z-index:0;
+    }
+
+    .shell{position:relative;z-index:1;width:min(1480px,calc(100% - 36px));margin:0 auto;padding:24px 0 72px}
+    .topbar{
+      height:48px;display:flex;align-items:center;gap:14px;
+      color:#cbd3db;font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+      border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;color:#fff;letter-spacing:.04em}
+    .brand-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--magenta));clip-path:polygon(0 18%,100% 0,82% 42%,100% 58%,0 100%,18% 56%)}
+    .spacer{flex:1}
+    .credit{padding:7px 10px;background:#fff;color:#111;font-weight:800}
+    .level{display:inline-flex;align-items:center;gap:7px}
+    .level b{background:var(--yellow);color:#171717;padding:5px 8px}
+
+    .tabs{display:flex;gap:2px;align-items:end;overflow:auto;background:#e7eaed;color:#6e7580;padding:0 4px;box-shadow:var(--shadow)}
+    .tab{
+      border:0;background:transparent;color:inherit;padding:11px 14px;text-decoration:none;
+      font:700 11px/1 Segoe UI, sans-serif;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+      transition:all var(--speed) var(--ease);display:inline-flex;align-items:center;gap:7px;
+    }
+    .tab:hover{background:#fff;color:#222}
+    .tab.active{background:#fff;color:var(--orange);box-shadow:inset 0 -3px var(--orange)}
+    .tab .dot{width:9px;height:9px;flex:0 0 9px}
+
+    .page-title{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:34px 0 18px}
+    .eyebrow{color:var(--cyan);font-weight:900;text-transform:uppercase;font-size:12px;letter-spacing:.16em}
+    h1{margin:5px 0 0;font-size:clamp(34px,4vw,60px);line-height:.92;text-transform:uppercase;letter-spacing:-.04em}
+    .page-title p{max-width:560px;color:#9aa5b0;line-height:1.5;margin:0}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .card{
+      position:relative;background:var(--panel);color:var(--ink);
+      min-height:130px;padding:18px;overflow:hidden;box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.6);
+      transition:transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease);
+    }
+    .card:hover{transform:translateY(-3px);box-shadow:0 24px 52px rgba(0,0,0,.3)}
+    .card.cyan{background:var(--cyan);color:#032c2e}
+    .card.dark{background:#17202a;color:#f8fafb;border-color:#27323e}
+    .card.magenta{background:linear-gradient(135deg,#a50750,var(--magenta));color:#fff}
+    .card.flat:hover{transform:none;box-shadow:var(--shadow)}
+    .card.hero{min-height:330px;background:
+      linear-gradient(180deg,rgba(9,18,26,.08),rgba(9,18,26,.72)),
+      radial-gradient(circle at 70% 20%,rgba(0,201,200,.55),transparent 22%),
+      linear-gradient(135deg,#30424a,#111820 58%,#29323b);color:#fff}
+    .card.hero:before{
+      content:"";position:absolute;inset:-20% -10%;opacity:.34;
+      background:repeating-linear-gradient(120deg, transparent 0 42px, rgba(255,255,255,.08) 43px 45px, transparent 46px 78px);
+      transform:rotate(-7deg);
+    }
+
+    .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}
+    .span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}
+    .span-12{grid-column:span 12}
+
+    .card-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--muted)}
+    .dark .card-label,.hero .card-label,.magenta .card-label{color:#c8d2db}
+    .cyan .card-label{color:#04494b}
+    .metric{font-size:46px;font-weight:900;letter-spacing:-.045em;margin-top:8px;line-height:1}
+    .metric small{font-size:18px;color:var(--muted);letter-spacing:0;font-weight:800}
+    .dark .metric small,.magenta .metric small,.hero .metric small{color:#9fadb9}
+    .cyan .metric small{color:#04494b}
+    .metric.mid{font-size:32px}
+    .note{font-size:11px;line-height:1.5;color:var(--muted);margin-top:9px}
+    .dark .note,.magenta .note,.hero .note{color:#9fadb9}
+    .cyan .note{color:#04585a}
+    .kicker{position:absolute;right:16px;top:15px;font-size:56px;font-weight:900;opacity:.08;line-height:1;letter-spacing:-.07em}
+
+    .hero-copy{position:absolute;left:22px;bottom:22px;right:22px;z-index:2}
+    .hero-copy h2{font-size:clamp(24px,2.4vw,34px);line-height:.95;margin:8px 0;text-transform:uppercase;letter-spacing:-.04em}
+    .hero-copy p{margin:0;color:#c8d3dc;font-size:13px;line-height:1.55;max-width:52ch}
+    .hero-chip{display:inline-flex;gap:7px;align-items:center;background:rgba(0,0,0,.35);padding:6px 9px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+    .hero-dot{width:8px;height:8px;background:var(--orange);border-radius:50%;box-shadow:0 0 0 4px rgba(255,91,26,.18)}
+    .hero-stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px}
+    .hero-stats div{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#93a1ad}
+    .hero-stats b{display:block;font-size:23px;color:#fff;letter-spacing:-.03em;margin-top:3px}
+
+    .section{margin-top:42px}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:12px}
+    .section-head h2{font-size:19px;margin:0;text-transform:uppercase;letter-spacing:.02em}
+    .section-head h2 em{font-style:normal;color:var(--cyan);margin-right:9px}
+    .section-head span{font-size:11px;color:#77838f;text-transform:uppercase;letter-spacing:.12em;text-align:right}
+    .lede{color:#9aa5b0;font-size:13px;line-height:1.6;margin:0 0 14px;max-width:82ch}
+    .lede b{color:#fff}
+
+    /* Ranking horizontal: 8 palcos com nome longo nao cabem em barra vertical */
+    .hbars{display:grid;gap:7px;margin-top:14px}
+    .hbar{
+      display:grid;grid-template-columns:132px 1fr 92px;gap:12px;align-items:center;
+      border:0;background:transparent;padding:5px 6px;width:100%;text-align:left;
+      font:inherit;color:inherit;cursor:pointer;position:relative;
+      transition:background var(--speed) var(--ease);
+    }
+    .hbar:hover{background:#e9edf0}
+    .hbar.is-selected{background:#e4e9ed;box-shadow:inset 3px 0 var(--orange)}
+    .hbar .nome{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hbar .trilha{height:19px;background:#e2e7ea;position:relative;overflow:hidden}
+    .hbar .fill{
+      position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--cyan-2),var(--cyan));
+      transform-origin:left;animation:grow .65s var(--ease) forwards;
+    }
+    .hbar.lider .fill{background:linear-gradient(90deg,#d63b00,var(--orange))}
+    .hbar .valor{font-size:13px;font-weight:900;text-align:right;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+    .hbar .zero{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+    .filtro{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .filtro-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#77838f;font-weight:800}
+
+    .kv{display:grid;grid-template-columns:1fr auto;gap:7px 12px;margin-top:12px;font-size:12px}
+    .kv dt{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.07em;font-weight:800;align-self:center}
+    .kv dd{margin:0;font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
+    .dark .kv dt{color:#8d9aa6}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .mini-table th,.mini-table td{padding:9px 8px;border-top:1px solid #e2e6e9;text-align:left}
+    .mini-table th{font-size:10px;color:#87919a;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+    .mini-table td.num{text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
+    .mini-table .rank{color:var(--muted);font-weight:900;width:22px}
+    .mini-table .sub{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    .dark .mini-table th,.dark .mini-table td{border-color:#2b3641}
+    .dark .mini-table .sub{color:#8d9aa6}
+    .mini-table tr.destaque td{background:#fff5ee}
+    .mini-table tr.destaque .marca{color:var(--orange);font-weight:900}
+
+    .podio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}
+    .pos{position:relative;background:var(--panel);color:var(--ink);padding:18px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.6)}
+    .pos .lugar{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+    .pos h3{margin:8px 0 0;font-size:clamp(15px,1.5vw,21px);text-transform:uppercase;letter-spacing:-.02em;line-height:1.05}
+    .pos .publico{font-size:31px;font-weight:900;letter-spacing:-.04em;margin-top:10px;font-variant-numeric:tabular-nums}
+    .pos .publico small{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:0}
+    .pos.p1{min-height:224px;background:linear-gradient(160deg,#fff,var(--panel));box-shadow:0 22px 48px rgba(0,0,0,.3)}
+    .pos.p1:after{content:"";position:absolute;inset:0;border:3px solid var(--orange);pointer-events:none}
+    .pos.p2{min-height:190px}
+    .pos.p3{min-height:166px}
+    .pos .faixa{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.45}
+
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#e6ebee;color:#37414c;padding:4px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+    .chip i{width:8px;height:8px}
+    .dark .chip{background:#222d38;color:#c3cdd7}
+
+    .footer{margin-top:54px;padding-top:18px;border-top:1px solid rgba(255,255,255,.09);display:flex;justify-content:space-between;gap:24px;color:#7e8993;font-size:11px;flex-wrap:wrap}
+    .footer a{color:#a9b4be}
+    .footer p{margin:0 0 6px;line-height:1.7;max-width:74ch}
+    .badge{display:inline-flex;align-items:center;gap:7px;background:#1d2731;color:#c8d0d7;padding:6px 8px;white-space:nowrap}
+
+    @media (max-width:1100px){
+      .span-3{grid-column:span 6}.span-4{grid-column:span 6}
+      .span-5,.span-7,.span-8{grid-column:span 12}
+    }
+    @media (max-width:700px){
+      .shell{width:min(100% - 20px,1480px)}
+      .page-title{align-items:start;flex-direction:column}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}
+      h1{font-size:40px}
+      .metric{font-size:38px}
+      .topbar{font-size:9px}
+      .credit{display:none}
+      .section-head{flex-direction:column;align-items:start}
+      .section-head span{text-align:left}
+      .hbar{grid-template-columns:96px 1fr 74px;gap:8px}
+      .podio{grid-template-columns:1fr}
+      .pos.p1,.pos.p2,.pos.p3{min-height:0}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+      .hbar .fill{transform:none!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand"><span class="brand-mark"></span>Horizon Festival 2012</div>
+      <div class="level"><b>002</b> Evento musical</div>
+      <div class="spacer"></div>
+      <div>Dados sintéticos · base higienizada</div>
+      <div class="credit" id="topReceita"></div>
+    </div>
+
+    <nav class="tabs" aria-label="Atos da análise">
+      <a class="tab active" href="#abertura">Abertura</a>
+      <a class="tab" href="#ato-palcos">01 · Palcos</a>
+      <a class="tab" href="#ato-artistas">02 · Artistas</a>
+      <a class="tab" href="#ato-musicas">03 · Músicas</a>
+      <a class="tab" href="#procedencia">Procedência</a>
+    </nav>
+
+    <header class="page-title" id="abertura">
+      <div>
+        <div class="eyebrow" id="eyebrowPeriodo"></div>
+        <h1>Sete dias,<br/>oito palcos</h1>
+      </div>
+      <p id="resumoTopo"></p>
+    </header>
+
+    <!-- ABERTURA -->
+    <section class="grid">
+      <article class="card hero span-7">
+        <div class="hero-copy">
+          <span class="hero-chip"><i class="hero-dot"></i> O festival em números</span>
+          <h2 id="heroTitulo"></h2>
+          <p id="heroTexto"></p>
+          <div class="hero-stats" id="heroStats"></div>
+        </div>
+      </article>
+
+      <article class="card cyan span-5">
+        <span class="kicker">01</span>
+        <div class="card-label">Ingressos emitidos</div>
+        <div class="metric" id="kpiIngressos"></div>
+        <div class="note" id="kpiIngressosNota"></div>
+      </article>
+
+      <article class="card span-3">
+        <span class="kicker">US$</span>
+        <div class="card-label">Receita total</div>
+        <div class="metric mid" id="kpiReceita"></div>
+        <div class="note" id="kpiReceitaNota"></div>
+      </article>
+      <article class="card span-3">
+        <span class="kicker">IN</span>
+        <div class="card-label">Taxa de check-in</div>
+        <div class="metric mid" id="kpiCheckin"></div>
+        <div class="note" id="kpiCheckinNota"></div>
+      </article>
+      <article class="card span-3">
+        <span class="kicker">★</span>
+        <div class="card-label">Nota do público</div>
+        <div class="metric mid" id="kpiNota"></div>
+        <div class="note" id="kpiNotaNota"></div>
+      </article>
+      <article class="card magenta span-3">
+        <span class="kicker">OC</span>
+        <div class="card-label">Ocupação média</div>
+        <div class="metric mid" id="kpiOcupacao"></div>
+        <div class="note" id="kpiOcupacaoNota"></div>
+      </article>
+    </section>
+
+    <!-- ATO 1 -->
+    <section class="section" id="ato-palcos">
+      <div class="section-head">
+        <h2><em>01</em>O palco que dominou o festival</h2>
+        <span id="ato1Selo"></span>
+      </div>
+      <p class="lede" id="ato1Lede"></p>
+
+      <div class="filtro">
+        <span class="filtro-label" id="filtroLabel">Pulseira</span>
+        <div class="tabs" role="group" aria-labelledby="filtroLabel" id="filtroCores"></div>
+      </div>
+
+      <div class="grid">
+        <article class="card flat span-8">
+          <div class="card-label" id="rankingLabel"></div>
+          <div class="hbars" id="rankingPalcos" role="list"></div>
+          <div class="note" id="rankingNota"></div>
+        </article>
+
+        <article class="card dark span-4" id="drilldown" aria-live="polite">
+          <span class="kicker" id="drillKicker"></span>
+          <div class="card-label">Palco selecionado</div>
+          <div class="metric mid" id="drillNome"></div>
+          <dl class="kv" id="drillKv"></dl>
+          <div class="card-label" style="margin-top:18px">Principais atrações</div>
+          <div id="drillAtracoes"></div>
+        </article>
+
+        <article class="card flat span-12">
+          <div class="card-label" id="pulseiraLabel"></div>
+          <div class="hbars" id="rankingPulseiras" role="list"></div>
+          <div class="note" id="pulseiraNota"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ATO 2 -->
+    <section class="section" id="ato-artistas">
+      <div class="section-head">
+        <h2><em>02</em>Quem trouxe a multidão</h2>
+        <span id="ato2Selo"></span>
+      </div>
+      <p class="lede" id="ato2Lede"></p>
+
+      <div class="podio" id="podio"></div>
+
+      <div class="grid" style="margin-top:10px">
+        <article class="card dark span-12 flat">
+          <div class="card-label">A ressalva: volume não é o mesmo que atração por show</div>
+          <p class="note" id="ressalvaTexto"></p>
+          <table class="mini-table" id="tabelaMedia"></table>
+        </article>
+      </div>
+    </section>
+
+    <!-- ATO 3 -->
+    <section class="section" id="ato-musicas">
+      <div class="section-head">
+        <h2><em>03</em>As queridinhas do público</h2>
+        <span id="ato3Selo"></span>
+      </div>
+      <p class="lede" id="ato3Lede"></p>
+
+      <div class="grid">
+        <article class="card span-6 flat">
+          <div class="card-label">Mais amadas · nota média do público</div>
+          <table class="mini-table" id="tabelaAmadas"></table>
+        </article>
+        <article class="card span-6 flat">
+          <div class="card-label">Mais lotadas · público somado</div>
+          <table class="mini-table" id="tabelaLotadas"></table>
+        </article>
+        <article class="card cyan span-12 flat">
+          <div class="card-label">O cruzamento das duas listas</div>
+          <div class="metric mid" id="cruzamentoTitulo"></div>
+          <div class="note" id="cruzamentoTexto"></div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer" id="procedencia">
+      <div>
+        <p id="procTexto"></p>
+        <p id="procDerivados"></p>
+      </div>
+      <span class="badge">SEM LIBS · RESPONSIVO · DADO RASTREÁVEL</span>
+    </footer>
+  </div>
+
+  <script id="dados" type="application/json">{"palcos":["Palco Principal","Palco Sunset","Palco Urbano","Palco Pulse","Palco Canyon","Palco Ranch","Palco Norte","Palco Dam"],"cores":["Yellow","Green","Blue","Pink","Orange","Purple","Gold"],"apresentacoes":[{"id":"MUS-0001","data":"2012-10-19","dia":1,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Avicii","faixa":"Levels (Skrillex Mix)","estilo":"EDM","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":24000,"ingressos":21478,"checkins":20884,"pessoas":21729,"no_show":594,"ocupacao":90.5,"preco":54.47,"rec_ing":1137551.48,"rec_ab":488910.98,"rec_merch":141417.92,"nota":8.9,"incidentes":5},{"id":"MUS-0002","data":"2012-10-20","dia":2,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Azari & III","faixa":"Reckless (With Your Love)","estilo":"Electro / House","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":8580,"ingressos":7184,"checkins":6984,"pessoas":7282,"no_show":200,"ocupacao":84.9,"preco":76.09,"rec_ing":531412.56,"rec_ab":203545.03,"rec_merch":18654.58,"nota":8.8,"incidentes":0},{"id":"MUS-0003","data":"2012-10-21","dia":3,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Benny Benassi","faixa":"Cinema (Skrillex Remix)","estilo":"Electro House","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":11040,"ingressos":8460,"checkins":8110,"pessoas":8744,"no_show":350,"ocupacao":79.2,"preco":106.32,"rec_ing":862255.2,"rec_ab":179141.38,"rec_merch":43833.22,"nota":9.2,"incidentes":2},{"id":"MUS-0004","data":"2012-10-22","dia":4,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Chase & Status","faixa":"Blind Faith (feat. Liam Bailey)","estilo":"Drum & Bass","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1980,"ingressos":1333,"checkins":1170,"pessoas":1213,"no_show":163,"ocupacao":61.3,"preco":137.08,"rec_ing":160383.6,"rec_ab":29610.38,"rec_merch":5658.69,"nota":8.4,"incidentes":0},{"id":"MUS-0005","data":"2012-10-23","dia":5,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Chromeo","faixa":"Hot Mess (Duck Sauce Mix)","estilo":"Electro Funk","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":22080,"ingressos":15899,"checkins":15332,"pessoas":16091,"no_show":567,"ocupacao":72.9,"preco":61.28,"rec_ing":939544.96,"rec_ab":324490.56,"rec_merch":147510.91,"nota":8.4,"incidentes":3},{"id":"MUS-0006","data":"2012-10-24","dia":6,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Digitalism","faixa":"Encore","estilo":"Electro","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":6930,"ingressos":6188,"checkins":5686,"pessoas":5927,"no_show":502,"ocupacao":85.5,"preco":100.85,"rec_ing":573433.1,"rec_ab":161234.85,"rec_merch":53365.73,"nota":9.1,"incidentes":0},{"id":"MUS-0007","data":"2012-10-25","dia":7,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"DJ Fresh","faixa":"The Power (feat. Dizzee Rascal)","estilo":"Drum & Bass","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":7200,"ingressos":5173,"checkins":5026,"pessoas":5256,"no_show":147,"ocupacao":73.0,"preco":127.78,"rec_ing":642222.28,"rec_ab":158549.01,"rec_merch":23756.87,"nota":7.1,"incidentes":1},{"id":"MUS-0008","data":"2012-10-19","dia":1,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Feed Me","faixa":"Silicone Lube","estilo":"Electro House","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":8200,"ingressos":7350,"checkins":7055,"pessoas":7336,"no_show":295,"ocupacao":89.5,"preco":55.46,"rec_ing":391270.3,"rec_ab":144550.02,"rec_merch":43568.26,"nota":8.9,"incidentes":1},{"id":"MUS-0009","data":"2012-10-20","dia":2,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Fenech-Soler","faixa":"Lies (Alex Metric Remix)","estilo":"Indietronica","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":7410,"ingressos":6166,"checkins":5522,"pessoas":5912,"no_show":644,"ocupacao":79.8,"preco":84.09,"rec_ing":464344.98,"rec_ab":98809.99,"rec_merch":36213.27,"nota":9.3,"incidentes":1},{"id":"MUS-0010","data":"2012-10-21","dia":3,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Madeon","faixa":"Icarus","estilo":"Electro House","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3772,"ingressos":3772,"checkins":3336,"pessoas":3444,"no_show":436,"ocupacao":91.3,"preco":111.76,"rec_ing":372831.36,"rec_ab":67592.39,"rec_merch":13784.61,"nota":9.5,"incidentes":0},{"id":"MUS-0011","data":"2012-10-22","dia":4,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Modestep","faixa":"Show Me A Sign","estilo":"Dubstep","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1710,"ingressos":1589,"checkins":1387,"pessoas":1482,"no_show":202,"ocupacao":86.7,"preco":141.19,"rec_ing":195830.53,"rec_ab":36681.85,"rec_merch":12278.69,"nota":9.1,"incidentes":1},{"id":"MUS-0012","data":"2012-10-23","dia":5,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Mord Fustang","faixa":"Lick The Rainbow","estilo":"Electro House","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":7544,"ingressos":6426,"checkins":5739,"pessoas":6037,"no_show":687,"ocupacao":80.0,"preco":65.84,"rec_ing":377855.76,"rec_ab":78462.26,"rec_merch":71602.16,"nota":8.7,"incidentes":0},{"id":"MUS-0013","data":"2012-10-24","dia":6,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Mr Magnetik","faixa":"Remanence (Junior Remix)","estilo":"Electronic","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":5985,"ingressos":4330,"checkins":3963,"pessoas":4129,"no_show":367,"ocupacao":69.0,"preco":100.69,"rec_ing":399034.47,"rec_ab":82750.35,"rec_merch":36201.56,"nota":8.9,"incidentes":0},{"id":"MUS-0014","data":"2012-10-25","dia":7,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Nero","faixa":"Me & You","estilo":"Dubstep","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2460,"ingressos":2083,"checkins":1898,"pessoas":2059,"no_show":185,"ocupacao":83.7,"preco":124.98,"rec_ing":237212.04,"rec_ab":53560.95,"rec_merch":12451.79,"nota":9.1,"incidentes":0},{"id":"MUS-0015","data":"2012-10-19","dia":1,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Nero","faixa":"Reaching Out (Fred Falke Remix)","estilo":"Electronic","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":7200,"ingressos":5231,"checkins":5065,"pessoas":5243,"no_show":166,"ocupacao":72.8,"preco":45.1,"rec_ing":228431.5,"rec_ab":101082.06,"rec_merch":16464.61,"nota":9.1,"incidentes":1},{"id":"MUS-0016","data":"2012-10-20","dia":2,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"New Order","faixa":"Blue Monday","estilo":"New Wave","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":3900,"ingressos":3280,"checkins":3102,"pessoas":3275,"no_show":178,"ocupacao":84.0,"preco":76.4,"rec_ing":236992.8,"rec_ab":69136.09,"rec_merch":11122.21,"nota":8.2,"incidentes":0},{"id":"MUS-0017","data":"2012-10-21","dia":3,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Porter Robinson","faixa":"Language","estilo":"Progressive House","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3312,"ingressos":2638,"checkins":2332,"pessoas":2421,"no_show":306,"ocupacao":73.1,"preco":101.85,"rec_ing":237514.2,"rec_ab":81197.14,"rec_merch":8565.63,"nota":8.8,"incidentes":1},{"id":"MUS-0018","data":"2012-10-22","dia":4,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"Rusko","faixa":"Everyday (Netsky VIP Remix)","estilo":"Drum & Bass","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":900,"ingressos":612,"checkins":584,"pessoas":624,"no_show":28,"ocupacao":69.3,"preco":135.2,"rec_ing":78956.8,"rec_ab":21857.97,"rec_merch":1859.89,"nota":9.7,"incidentes":0},{"id":"MUS-0019","data":"2012-10-23","dia":5,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Rusko","faixa":"Somebody to Love (Sigma Remix)","estilo":"Drum & Bass","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":6624,"ingressos":6624,"checkins":5814,"pessoas":6211,"no_show":810,"ocupacao":93.8,"preco":65.74,"rec_ing":382212.36,"rec_ab":211691.2,"rec_merch":25241.83,"nota":9.1,"incidentes":1},{"id":"MUS-0020","data":"2012-10-24","dia":6,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"Scuba","faixa":"The Hope","estilo":"Techno","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":3150,"ingressos":3150,"checkins":2811,"pessoas":2940,"no_show":339,"ocupacao":93.3,"preco":89.17,"rec_ing":250656.87,"rec_ab":71139.89,"rec_merch":23526.51,"nota":7.5,"incidentes":0},{"id":"MUS-0021","data":"2012-10-25","dia":7,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"The Hacker","faixa":"Bass 4","estilo":"Electro","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2160,"ingressos":1392,"checkins":1271,"pessoas":1357,"no_show":121,"ocupacao":62.8,"preco":115.8,"rec_ing":147181.8,"rec_ab":41454.49,"rec_merch":4275.84,"nota":9.7,"incidentes":0},{"id":"MUS-0022","data":"2012-10-19","dia":1,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Wolfgang Gartner","faixa":"Illmerica (Extended Version)","estilo":"Electro House","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":6800,"ingressos":5396,"checkins":4727,"pessoas":5025,"no_show":669,"ocupacao":73.9,"preco":53.67,"rec_ing":253698.09,"rec_ab":98098.2,"rec_merch":37518.84,"nota":8.9,"incidentes":1},{"id":"MUS-0023","data":"2012-10-20","dia":2,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Cut Copy","faixa":"Need You Now","estilo":"Indietronica","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":4992,"ingressos":4632,"checkins":4400,"pessoas":4626,"no_show":232,"ocupacao":92.7,"preco":79.4,"rec_ing":349360.0,"rec_ab":173139.33,"rec_merch":11974.39,"nota":7.9,"incidentes":0},{"id":"MUS-0024","data":"2012-10-21","dia":3,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Electric Guest","faixa":"Awake","estilo":"Indie Pop","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3128,"ingressos":2073,"checkins":1904,"pessoas":2009,"no_show":169,"ocupacao":64.2,"preco":113.33,"rec_ing":215780.32,"rec_ab":60847.36,"rec_merch":8033.18,"nota":9.0,"incidentes":0},{"id":"MUS-0025","data":"2012-10-22","dia":4,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Empire of the Sun","faixa":"Walking on a Dream","estilo":"Synthpop","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1152,"ingressos":1017,"checkins":886,"pessoas":946,"no_show":131,"ocupacao":82.1,"preco":142.04,"rec_ing":125847.44,"rec_ab":21668.44,"rec_merch":4741.76,"nota":9.3,"incidentes":0},{"id":"MUS-0026","data":"2012-10-23","dia":5,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Fixers","faixa":"Iron Deer Dream (Chad Valley Remix)","estilo":"Indie Electronic","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":6256,"ingressos":4296,"checkins":4061,"pessoas":4235,"no_show":235,"ocupacao":67.7,"preco":66.08,"rec_ing":268350.88,"rec_ab":84062.93,"rec_merch":12631.27,"nota":7.7,"incidentes":0},{"id":"MUS-0027","data":"2012-10-24","dia":6,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Foster The People","faixa":"Don't Stop (Color on the Walls)","estilo":"Indie Pop","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4032,"ingressos":2576,"checkins":2421,"pessoas":2544,"no_show":155,"ocupacao":63.1,"preco":97.38,"rec_ing":235756.98,"rec_ab":60817.95,"rec_merch":6593.7,"nota":9.7,"incidentes":1},{"id":"MUS-0028","data":"2012-10-25","dia":7,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Friendly Fires","faixa":"Hawaiian Air","estilo":"Indie Dance","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2040,"ingressos":2040,"checkins":1872,"pessoas":2006,"no_show":168,"ocupacao":98.3,"preco":121.02,"rec_ing":226549.44,"rec_ab":32041.07,"rec_merch":22796.86,"nota":8.7,"incidentes":0},{"id":"MUS-0029","data":"2012-10-19","dia":1,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Friendly Fires","faixa":"Hurting","estilo":"Indie Dance","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":11000,"ingressos":8512,"checkins":7689,"pessoas":8186,"no_show":823,"ocupacao":74.4,"preco":58.63,"rec_ing":450806.07,"rec_ab":248296.91,"rec_merch":38875.35,"nota":9.1,"incidentes":3},{"id":"MUS-0030","data":"2012-10-20","dia":2,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Hooray for Earth","faixa":"No Love","estilo":"Indie Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":18720,"ingressos":13031,"checkins":12141,"pessoas":12753,"no_show":890,"ocupacao":68.1,"preco":84.23,"rec_ing":1022636.43,"rec_ab":435246.86,"rec_merch":64206.95,"nota":8.6,"incidentes":2},{"id":"MUS-0031","data":"2012-10-21","dia":3,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Hot Chip","faixa":"Over & Over","estilo":"Indietronica","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":5060,"ingressos":5034,"checkins":4454,"pessoas":4651,"no_show":580,"ocupacao":91.9,"preco":105.9,"rec_ing":471678.6,"rec_ab":170480.84,"rec_merch":21477.27,"nota":8.1,"incidentes":0},{"id":"MUS-0032","data":"2012-10-22","dia":4,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Ladyhawke","faixa":"Black, White and Blue","estilo":"Synthpop","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":4320,"ingressos":3195,"checkins":3091,"pessoas":3305,"no_show":104,"ocupacao":76.5,"preco":138.51,"rec_ing":428134.41,"rec_ab":102917.01,"rec_merch":9129.09,"nota":8.9,"incidentes":0},{"id":"MUS-0033","data":"2012-10-23","dia":5,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Maverick Sabre","faixa":"Let Me Go","estilo":"Soul / Pop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":10120,"ingressos":8800,"checkins":7671,"pessoas":7941,"no_show":1129,"ocupacao":78.5,"preco":69.2,"rec_ing":530833.2,"rec_ab":148845.71,"rec_merch":58434.0,"nota":7.9,"incidentes":2},{"id":"MUS-0034","data":"2012-10-24","dia":6,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Miike Snow","faixa":"Paddling Out","estilo":"Indie Pop","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":15120,"ingressos":11030,"checkins":9933,"pessoas":10342,"no_show":1097,"ocupacao":68.4,"preco":92.1,"rec_ing":914829.3,"rec_ab":171199.83,"rec_merch":58296.82,"nota":8.0,"incidentes":3},{"id":"MUS-0035","data":"2012-10-25","dia":7,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Noah and the Whale","faixa":"Life is Life (Yuksek Remix)","estilo":"Indie Electronic","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":3300,"ingressos":3067,"checkins":2893,"pessoas":3020,"no_show":174,"ocupacao":91.5,"preco":124.76,"rec_ing":360930.68,"rec_ab":69790.27,"rec_merch":26626.83,"nota":7.7,"incidentes":1},{"id":"MUS-0036","data":"2012-10-19","dia":1,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Passion Pit","faixa":"Take A Walk","estilo":"Indie Pop","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":9500,"ingressos":6600,"checkins":6040,"pessoas":6408,"no_show":560,"ocupacao":67.5,"preco":49.02,"rec_ing":296080.8,"rec_ab":126268.89,"rec_merch":55875.86,"nota":7.8,"incidentes":1},{"id":"MUS-0037","data":"2012-10-20","dia":2,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"Phoenix","faixa":"1901","estilo":"Indie Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":6396,"ingressos":4553,"checkins":4212,"pessoas":4566,"no_show":341,"ocupacao":71.4,"preco":82.22,"rec_ing":346310.64,"rec_ab":90549.99,"rec_merch":38276.68,"nota":9.8,"incidentes":2},{"id":"MUS-0038","data":"2012-10-21","dia":3,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Sam and the Womp","faixa":"Bom Bom","estilo":"Dance Pop","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":4370,"ingressos":3150,"checkins":2968,"pessoas":3173,"no_show":182,"ocupacao":72.6,"preco":104.43,"rec_ing":309948.24,"rec_ab":90314.69,"rec_merch":10127.8,"nota":7.7,"incidentes":1},{"id":"MUS-0039","data":"2012-10-22","dia":4,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"Santigold","faixa":"Disparate Youth","estilo":"Alternative Pop","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1476,"ingressos":1038,"checkins":936,"pessoas":991,"no_show":102,"ocupacao":67.1,"preco":141.5,"rec_ing":132444.0,"rec_ab":40101.67,"rec_merch":9805.94,"nota":8.7,"incidentes":1},{"id":"MUS-0040","data":"2012-10-23","dia":5,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Tesla Boy","faixa":"Spirit of the Night","estilo":"Synthpop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":8740,"ingressos":8034,"checkins":7441,"pessoas":7909,"no_show":593,"ocupacao":90.5,"preco":65.39,"rec_ing":486566.99,"rec_ab":233719.44,"rec_merch":93998.29,"nota":7.2,"incidentes":0},{"id":"MUS-0041","data":"2012-10-24","dia":6,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"The Maccabees","faixa":"Pelican","estilo":"Indie Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":5166,"ingressos":5166,"checkins":4704,"pessoas":5010,"no_show":462,"ocupacao":97.0,"preco":99.56,"rec_ing":468330.24,"rec_ab":141100.16,"rec_merch":24861.22,"nota":8.5,"incidentes":2},{"id":"MUS-0042","data":"2012-10-25","dia":7,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"The Naked & Famous","faixa":"Punching in a Dream","estilo":"Indie Electronic","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2850,"ingressos":2705,"checkins":2489,"pessoas":2634,"no_show":216,"ocupacao":92.4,"preco":124.99,"rec_ing":311100.11,"rec_ab":50587.4,"rec_merch":28931.21,"nota":8.8,"incidentes":0},{"id":"MUS-0043","data":"2012-10-19","dia":1,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Tom Vek","faixa":"Aroused","estilo":"Indie Electronic","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":5000,"ingressos":3923,"checkins":3761,"pessoas":3917,"no_show":162,"ocupacao":78.3,"preco":52.6,"rec_ing":197828.6,"rec_ab":63038.14,"rec_merch":25426.67,"nota":9.2,"incidentes":0},{"id":"MUS-0044","data":"2012-10-20","dia":2,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Pulse","artista":"Two Door Cinema Club","faixa":"Something Good Can Work (The Twelves Remix)","estilo":"Indie Dance","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":5616,"ingressos":5161,"checkins":4567,"pessoas":4876,"no_show":594,"ocupacao":86.8,"preco":86.2,"rec_ing":393675.4,"rec_ab":86338.85,"rec_merch":53492.62,"nota":8.9,"incidentes":0},{"id":"MUS-0045","data":"2012-10-21","dia":3,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Willy Moon","faixa":"Yeah Yeah","estilo":"Indie Pop","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":2300,"ingressos":2152,"checkins":1917,"pessoas":2060,"no_show":235,"ocupacao":89.6,"preco":107.1,"rec_ing":205310.7,"rec_ab":29793.55,"rec_merch":18440.81,"nota":8.2,"incidentes":0},{"id":"MUS-0046","data":"2012-10-22","dia":4,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Rocks","artista":"Arctic Monkeys","faixa":"R U Mine?","estilo":"Indie Rock","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1296,"ingressos":1063,"checkins":1022,"pessoas":1087,"no_show":41,"ocupacao":83.9,"preco":137.29,"rec_ing":140310.38,"rec_ab":26440.86,"rec_merch":7143.57,"nota":8.8,"incidentes":0},{"id":"MUS-0047","data":"2012-10-23","dia":5,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Rocks","artista":"The Black Keys","faixa":"Lonely Boy","estilo":"Blues Rock","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":4600,"ingressos":3366,"checkins":3166,"pessoas":3337,"no_show":200,"ocupacao":72.5,"preco":62.9,"rec_ing":199141.4,"rec_ab":97323.99,"rec_merch":34810.43,"nota":7.4,"incidentes":1},{"id":"MUS-0048","data":"2012-10-24","dia":6,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Rocks","artista":"Four Year Strong","faixa":"The Infected","estilo":"Pop Punk","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4536,"ingressos":2913,"checkins":2549,"pessoas":2654,"no_show":364,"ocupacao":58.5,"preco":97.56,"rec_ing":248680.44,"rec_ab":73982.1,"rec_merch":7148.84,"nota":8.7,"incidentes":0},{"id":"MUS-0049","data":"2012-10-25","dia":7,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Rocks","artista":"Howler","faixa":"Back of Your Neck","estilo":"Indie Rock","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":1500,"ingressos":1361,"checkins":1246,"pessoas":1300,"no_show":115,"ocupacao":86.7,"preco":117.35,"rec_ing":146218.1,"rec_ab":40858.13,"rec_merch":4664.48,"nota":9.2,"incidentes":0},{"id":"MUS-0050","data":"2012-10-19","dia":1,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Rocks","artista":"LCD Soundsystem","faixa":"Give It Up","estilo":"Dance Punk","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":6400,"ingressos":4265,"checkins":4146,"pessoas":4366,"no_show":119,"ocupacao":68.2,"preco":50.55,"rec_ing":209580.3,"rec_ab":85547.73,"rec_merch":39559.61,"nota":8.3,"incidentes":0},{"id":"MUS-0051","data":"2012-10-20","dia":2,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Rocks","artista":"Lostprophets","faixa":"Bring Em Down","estilo":"Alternative Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":5304,"ingressos":5050,"checkins":4472,"pessoas":4721,"no_show":578,"ocupacao":89.0,"preco":77.86,"rec_ing":348189.92,"rec_ab":93998.17,"rec_merch":34494.59,"nota":7.8,"incidentes":2},{"id":"MUS-0052","data":"2012-10-21","dia":3,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Rocks","artista":"Lostprophets","faixa":"We Bring An Arsenal","estilo":"Alternative Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":2944,"ingressos":2866,"checkins":2762,"pessoas":2944,"no_show":104,"ocupacao":100.0,"preco":110.9,"rec_ing":306305.8,"rec_ab":77295.3,"rec_merch":34362.37,"nota":8.4,"incidentes":1},{"id":"MUS-0053","data":"2012-10-22","dia":4,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Rocks","artista":"Mona","faixa":"Teenager","estilo":"Alternative Rock","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1224,"ingressos":1042,"checkins":963,"pessoas":1016,"no_show":79,"ocupacao":83.0,"preco":133.51,"rec_ing":128570.13,"rec_ab":27201.58,"rec_merch":5232.22,"nota":7.5,"incidentes":0},{"id":"MUS-0054","data":"2012-10-23","dia":5,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Rocks","artista":"Neon Trees","faixa":"Animal","estilo":"Alternative Rock","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":5888,"ingressos":5093,"checkins":4608,"pessoas":4830,"no_show":485,"ocupacao":82.0,"preco":61.55,"rec_ing":283622.4,"rec_ab":87486.88,"rec_merch":27691.45,"nota":9.2,"incidentes":0},{"id":"MUS-0055","data":"2012-10-24","dia":6,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Rocks","artista":"Pulled Apart By Horses","faixa":"Wildfire, Smoke & Doom","estilo":"Alternative Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4284,"ingressos":3164,"checkins":3081,"pessoas":3310,"no_show":83,"ocupacao":77.3,"preco":93.84,"rec_ing":289121.04,"rec_ab":103948.08,"rec_merch":28585.42,"nota":7.3,"incidentes":0},{"id":"MUS-0056","data":"2012-10-25","dia":7,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Rocks","artista":"Silversun Pickups","faixa":"Lazy Eye","estilo":"Alternative Rock","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":1920,"ingressos":1267,"checkins":1205,"pessoas":1285,"no_show":62,"ocupacao":66.9,"preco":121.63,"rec_ing":146564.15,"rec_ab":32997.95,"rec_merch":12318.51,"nota":8.0,"incidentes":1},{"id":"MUS-0057","data":"2012-10-19","dia":1,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"The Duke Spirit","faixa":"Surrender","estilo":"Alternative Rock","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":24000,"ingressos":17675,"checkins":16766,"pessoas":17356,"no_show":909,"ocupacao":72.3,"preco":55.4,"rec_ing":928836.4,"rec_ab":551862.32,"rec_merch":74971.66,"nota":8.5,"incidentes":3},{"id":"MUS-0058","data":"2012-10-20","dia":2,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Rocks","artista":"The Enemy","faixa":"Away from Here","estilo":"Indie Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":8580,"ingressos":7494,"checkins":6708,"pessoas":7160,"no_show":786,"ocupacao":83.4,"preco":77.15,"rec_ing":517522.2,"rec_ab":129078.98,"rec_merch":66059.42,"nota":8.6,"incidentes":1},{"id":"MUS-0059","data":"2012-10-21","dia":3,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"The Enemy","faixa":"Had Enough","estilo":"Indie Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":11040,"ingressos":7103,"checkins":6707,"pessoas":7282,"no_show":396,"ocupacao":66.0,"preco":102.44,"rec_ing":687065.08,"rec_ab":100360.95,"rec_merch":51321.97,"nota":7.6,"incidentes":3},{"id":"MUS-0060","data":"2012-10-22","dia":4,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Rocks","artista":"The Hives","faixa":"Hate To Say I Told You So","estilo":"Garage Rock","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1980,"ingressos":1442,"checkins":1275,"pessoas":1319,"no_show":167,"ocupacao":66.6,"preco":130.04,"rec_ing":165801.0,"rec_ab":30825.63,"rec_merch":5167.02,"nota":8.0,"incidentes":0},{"id":"MUS-0061","data":"2012-10-23","dia":5,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"The Stone Roses","faixa":"She Bangs The Drums","estilo":"Alternative Rock","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":22080,"ingressos":22080,"checkins":21253,"pessoas":22080,"no_show":827,"ocupacao":100.0,"preco":69.86,"rec_ing":1484734.58,"rec_ab":504970.36,"rec_merch":117572.79,"nota":7.9,"incidentes":4},{"id":"MUS-0062","data":"2012-10-24","dia":6,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Rocks","artista":"The Subways","faixa":"Rock & Roll Queen","estilo":"Indie Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":6930,"ingressos":5991,"checkins":5803,"pessoas":6230,"no_show":188,"ocupacao":89.9,"preco":95.76,"rec_ing":555695.28,"rec_ab":95521.04,"rec_merch":29771.42,"nota":8.1,"incidentes":1},{"id":"MUS-0063","data":"2012-10-25","dia":7,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"TOY","faixa":"Motoring","estilo":"PSYCHEDELIC ROCK","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":7200,"ingressos":5728,"checkins":5170,"pessoas":5428,"no_show":558,"ocupacao":75.4,"preco":124.9,"rec_ing":645733.0,"rec_ab":159178.3,"rec_merch":49015.69,"nota":9.5,"incidentes":0},{"id":"MUS-0064","data":"2012-10-19","dia":1,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"Wavves","faixa":"Bug","estilo":"Noise Pop","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":8200,"ingressos":7287,"checkins":6598,"pessoas":7104,"no_show":689,"ocupacao":86.6,"preco":54.07,"rec_ing":356753.86,"rec_ab":232516.77,"rec_merch":22579.31,"nota":8.8,"incidentes":2},{"id":"MUS-0065","data":"2012-10-20","dia":2,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Rocks","artista":"White Lies","faixa":"Farewell to the Fairground","estilo":"Post Punk","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":7410,"ingressos":6980,"checkins":6388,"pessoas":6644,"no_show":592,"ocupacao":89.7,"preco":82.8,"rec_ing":528926.4,"rec_ab":207742.13,"rec_merch":47777.37,"nota":8.7,"incidentes":1},{"id":"MUS-0066","data":"2012-10-21","dia":3,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"You Me At Six","faixa":"Bite My Tongue (feat. Oli Sykes)","estilo":"Post Hardcore","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3772,"ingressos":3039,"checkins":2860,"pessoas":2971,"no_show":179,"ocupacao":78.8,"preco":114.99,"rec_ing":328871.4,"rec_ab":74716.68,"rec_merch":8563.02,"nota":8.5,"incidentes":0},{"id":"MUS-0067","data":"2012-10-22","dia":4,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Rocks","artista":"Yuck","faixa":"Get Away","estilo":"Indie Rock","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1710,"ingressos":1539,"checkins":1352,"pessoas":1407,"no_show":187,"ocupacao":82.3,"preco":142.57,"rec_ing":192754.64,"rec_ab":35748.51,"rec_merch":7808.93,"nota":8.8,"incidentes":0},{"id":"MUS-0068","data":"2012-10-23","dia":5,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Avicii","faixa":"Levels (Skrillex Mix)","estilo":"EDM","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":7544,"ingressos":6012,"checkins":5548,"pessoas":5905,"no_show":464,"ocupacao":78.3,"preco":65.37,"rec_ing":362672.76,"rec_ab":96590.7,"rec_merch":69187.44,"nota":7.9,"incidentes":1},{"id":"MUS-0069","data":"2012-10-24","dia":6,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Azari & III","faixa":"Reckless (With Your Love)","estilo":"Electro / House","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":5985,"ingressos":5985,"checkins":5422,"pessoas":5722,"no_show":563,"ocupacao":95.6,"preco":94.26,"rec_ing":511077.72,"rec_ab":149494.34,"rec_merch":38333.9,"nota":9.0,"incidentes":1},{"id":"MUS-0070","data":"2012-10-25","dia":7,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Benny Benassi","faixa":"Cinema (Skrillex Remix)","estilo":"Electro House","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2460,"ingressos":1663,"checkins":1571,"pessoas":1694,"no_show":92,"ocupacao":68.9,"preco":128.62,"rec_ing":202062.02,"rec_ab":41763.78,"rec_merch":6783.78,"nota":7.7,"incidentes":0},{"id":"MUS-0071","data":"2012-10-19","dia":1,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Chase & Status","faixa":"Blind Faith (feat. Liam Bailey)","estilo":"Drum & Bass","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":7200,"ingressos":4752,"checkins":4138,"pessoas":4478,"no_show":614,"ocupacao":62.2,"preco":54.07,"rec_ing":223741.66,"rec_ab":73389.04,"rec_merch":23611.08,"nota":8.3,"incidentes":0},{"id":"MUS-0072","data":"2012-10-20","dia":2,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"Chromeo","faixa":"Hot Mess (Duck Sauce Mix)","estilo":"Electro Funk","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":3900,"ingressos":3227,"checkins":2986,"pessoas":3134,"no_show":241,"ocupacao":80.4,"preco":85.91,"rec_ing":256527.26,"rec_ab":84291.22,"rec_merch":33559.67,"nota":8.3,"incidentes":1},{"id":"MUS-0073","data":"2012-10-21","dia":3,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Digitalism","faixa":"Encore","estilo":"Electro","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3312,"ingressos":2644,"checkins":2318,"pessoas":2464,"no_show":326,"ocupacao":74.4,"preco":111.16,"rec_ing":257668.88,"rec_ab":80505.51,"rec_merch":21607.89,"nota":9.0,"incidentes":0},{"id":"MUS-0074","data":"2012-10-22","dia":4,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"DJ Fresh","faixa":"The Power (feat. Dizzee Rascal)","estilo":"Drum & Bass","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":900,"ingressos":745,"checkins":700,"pessoas":755,"no_show":45,"ocupacao":83.9,"preco":141.17,"rec_ing":98819.0,"rec_ab":24156.39,"rec_merch":4634.36,"nota":8.9,"incidentes":0},{"id":"MUS-0075","data":"2012-10-23","dia":5,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Feed Me","faixa":"Silicone Lube","estilo":"Electro House","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":6624,"ingressos":5013,"checkins":4638,"pessoas":4997,"no_show":375,"ocupacao":75.4,"preco":65.93,"rec_ing":305783.34,"rec_ab":62243.01,"rec_merch":40509.25,"nota":9.4,"incidentes":0},{"id":"MUS-0076","data":"2012-10-24","dia":6,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"Fenech-Soler","faixa":"Lies (Alex Metric Remix)","estilo":"Indietronica","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":3150,"ingressos":2549,"checkins":2344,"pessoas":2479,"no_show":205,"ocupacao":78.7,"preco":99.19,"rec_ing":232501.36,"rec_ab":65105.93,"rec_merch":24602.81,"nota":8.4,"incidentes":1},{"id":"MUS-0077","data":"2012-10-25","dia":7,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Madeon","faixa":"Icarus","estilo":"Electro House","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2160,"ingressos":1708,"checkins":1650,"pessoas":1732,"no_show":58,"ocupacao":80.2,"preco":128.36,"rec_ing":211794.0,"rec_ab":58458.56,"rec_merch":12358.69,"nota":7.6,"incidentes":0},{"id":"MUS-0078","data":"2012-10-19","dia":1,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Modestep","faixa":"Show Me A Sign","estilo":"Dubstep","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":6800,"ingressos":4902,"checkins":4427,"pessoas":4626,"no_show":475,"ocupacao":68.0,"preco":51.08,"rec_ing":226131.16,"rec_ab":61534.91,"rec_merch":49912.24,"nota":7.6,"incidentes":1},{"id":"MUS-0079","data":"2012-10-20","dia":2,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Bass Arena","artista":"Mord Fustang","faixa":"Lick The Rainbow","estilo":"Electro House","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":4992,"ingressos":4992,"checkins":4843,"pessoas":4992,"no_show":149,"ocupacao":100.0,"preco":79.03,"rec_ing":382742.29,"rec_ab":84280.57,"rec_merch":44813.7,"nota":8.7,"incidentes":1},{"id":"MUS-0080","data":"2012-10-21","dia":3,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Mr Magnetik","faixa":"Remanence (Junior Remix)","estilo":"Electronic","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3128,"ingressos":2759,"checkins":2579,"pessoas":2745,"no_show":180,"ocupacao":87.8,"preco":104.25,"rec_ing":268860.75,"rec_ab":74253.35,"rec_merch":24252.04,"nota":9.1,"incidentes":0},{"id":"MUS-0081","data":"2012-10-22","dia":4,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Bass Arena","artista":"Nero","faixa":"Me & You","estilo":"Dubstep","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1152,"ingressos":856,"checkins":785,"pessoas":819,"no_show":71,"ocupacao":71.1,"preco":137.95,"rec_ing":108290.75,"rec_ab":18523.69,"rec_merch":8624.39,"nota":8.7,"incidentes":0},{"id":"MUS-0082","data":"2012-10-23","dia":5,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Nero","faixa":"Reaching Out (Fred Falke Remix)","estilo":"Electronic","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":6256,"ingressos":5178,"checkins":4919,"pessoas":5219,"no_show":259,"ocupacao":83.4,"preco":59.31,"rec_ing":291745.89,"rec_ab":138523.85,"rec_merch":13449.0,"nota":9.2,"incidentes":0},{"id":"MUS-0083","data":"2012-10-24","dia":6,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Bass Arena","artista":"New Order","faixa":"Blue Monday","estilo":"New Wave","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4032,"ingressos":4032,"checkins":3545,"pessoas":3795,"no_show":487,"ocupacao":94.1,"preco":97.86,"rec_ing":346913.7,"rec_ab":80205.8,"rec_merch":17383.16,"nota":8.7,"incidentes":1},{"id":"MUS-0084","data":"2012-10-25","dia":7,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Porter Robinson","faixa":"Language","estilo":"Progressive House","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2040,"ingressos":1927,"checkins":1723,"pessoas":1826,"no_show":204,"ocupacao":89.5,"preco":127.65,"rec_ing":219940.95,"rec_ab":47935.5,"rec_merch":12211.96,"nota":7.6,"incidentes":0},{"id":"MUS-0085","data":"2012-10-19","dia":1,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Rusko","faixa":"Everyday (Netsky VIP Remix)","estilo":"Drum & Bass","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":11000,"ingressos":7246,"checkins":6840,"pessoas":7305,"no_show":406,"ocupacao":66.4,"preco":56.01,"rec_ing":383108.4,"rec_ab":189430.53,"rec_merch":53085.8,"nota":8.4,"incidentes":2},{"id":"MUS-0086","data":"2012-10-20","dia":2,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Rusko","faixa":"Somebody to Love (Sigma Remix)","estilo":"Drum & Bass","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":18720,"ingressos":18720,"checkins":16396,"pessoas":17640,"no_show":2324,"ocupacao":94.2,"preco":84.26,"rec_ing":1381526.96,"rec_ab":309589.69,"rec_merch":170480.71,"nota":8.6,"incidentes":5},{"id":"MUS-0087","data":"2012-10-21","dia":3,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Scuba","faixa":"The Hope","estilo":"Techno","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":5060,"ingressos":4604,"checkins":4296,"pessoas":4610,"no_show":308,"ocupacao":91.1,"preco":112.07,"rec_ing":481452.72,"rec_ab":72187.71,"rec_merch":31442.35,"nota":8.0,"incidentes":0},{"id":"MUS-0088","data":"2012-10-22","dia":4,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"The Hacker","faixa":"Bass 4","estilo":"Electro","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":4320,"ingressos":3764,"checkins":3344,"pessoas":3590,"no_show":420,"ocupacao":83.1,"preco":135.6,"rec_ing":453446.4,"rec_ab":128212.27,"rec_merch":20161.65,"nota":7.8,"incidentes":0},{"id":"MUS-0089","data":"2012-10-23","dia":5,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Wolfgang Gartner","faixa":"Illmerica (Extended Version)","estilo":"Electro House","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":10120,"ingressos":9039,"checkins":8372,"pessoas":8937,"no_show":667,"ocupacao":88.3,"preco":60.96,"rec_ing":510357.12,"rec_ab":244720.61,"rec_merch":64167.07,"nota":9.6,"incidentes":2},{"id":"MUS-0090","data":"2012-10-24","dia":6,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Cut Copy","faixa":"Need You Now","estilo":"Indietronica","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":15120,"ingressos":10256,"checkins":9511,"pessoas":10205,"no_show":745,"ocupacao":67.5,"preco":95.22,"rec_ing":905637.42,"rec_ab":340278.7,"rec_merch":89005.54,"nota":9.0,"incidentes":1},{"id":"MUS-0091","data":"2012-10-25","dia":7,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Electric Guest","faixa":"Awake","estilo":"Indie Pop","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":3300,"ingressos":3300,"checkins":3120,"pessoas":3300,"no_show":180,"ocupacao":100.0,"preco":128.31,"rec_ing":400327.2,"rec_ab":88021.13,"rec_merch":29746.08,"nota":6.8,"incidentes":0},{"id":"MUS-0092","data":"2012-10-19","dia":1,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Empire of the Sun","faixa":"Walking on a Dream","estilo":"Synthpop","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":9500,"ingressos":7355,"checkins":6863,"pessoas":7118,"no_show":492,"ocupacao":74.9,"preco":46.28,"rec_ing":317619.64,"rec_ab":111808.14,"rec_merch":83461.3,"nota":9.1,"incidentes":1},{"id":"MUS-0093","data":"2012-10-20","dia":2,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"Fixers","faixa":"Iron Deer Dream (Chad Valley Remix)","estilo":"Indie Electronic","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":6396,"ingressos":6396,"checkins":5707,"pessoas":5955,"no_show":689,"ocupacao":93.1,"preco":81.21,"rec_ing":463465.47,"rec_ab":149324.14,"rec_merch":58695.47,"nota":8.7,"incidentes":0},{"id":"MUS-0094","data":"2012-10-21","dia":3,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Foster The People","faixa":"Don't Stop (Color on the Walls)","estilo":"Indie Pop","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":4370,"ingressos":3230,"checkins":2815,"pessoas":3054,"no_show":415,"ocupacao":69.9,"preco":102.54,"rec_ing":288650.1,"rec_ab":80698.45,"rec_merch":18028.68,"nota":8.7,"incidentes":0},{"id":"MUS-0095","data":"2012-10-22","dia":4,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"Friendly Fires","faixa":"Hawaiian Air","estilo":"Indie Dance","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1476,"ingressos":925,"checkins":876,"pessoas":912,"no_show":49,"ocupacao":61.8,"preco":139.44,"rec_ing":122149.44,"rec_ab":27560.49,"rec_merch":6726.69,"nota":9.1,"incidentes":0},{"id":"MUS-0096","data":"2012-10-23","dia":5,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Friendly Fires","faixa":"Hurting","estilo":"Indie Dance","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":8740,"ingressos":8740,"checkins":8481,"pessoas":9085,"no_show":259,"ocupacao":100.0,"preco":65.41,"rec_ing":554742.21,"rec_ab":211115.09,"rec_merch":61619.87,"nota":7.7,"incidentes":2},{"id":"MUS-0097","data":"2012-10-24","dia":6,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"Hooray for Earth","faixa":"No Love","estilo":"Indie Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":5166,"ingressos":4291,"checkins":3773,"pessoas":3888,"no_show":518,"ocupacao":75.3,"preco":87.92,"rec_ing":331722.16,"rec_ab":80041.22,"rec_merch":29974.09,"nota":7.5,"incidentes":2},{"id":"MUS-0098","data":"2012-10-25","dia":7,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Hot Chip","faixa":"Over & Over","estilo":"Indietronica","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2850,"ingressos":2417,"checkins":2241,"pessoas":2367,"no_show":176,"ocupacao":83.1,"preco":126.94,"rec_ing":284472.54,"rec_ab":77347.58,"rec_merch":22126.67,"nota":8.7,"incidentes":1},{"id":"MUS-0099","data":"2012-10-19","dia":1,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Ladyhawke","faixa":"Black, White and Blue","estilo":"Synthpop","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":5000,"ingressos":3591,"checkins":3373,"pessoas":3560,"no_show":218,"ocupacao":71.2,"preco":49.38,"rec_ing":166558.74,"rec_ab":52477.28,"rec_merch":41150.5,"nota":8.2,"incidentes":0},{"id":"MUS-0100","data":"2012-10-20","dia":2,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Pulse","artista":"Maverick Sabre","faixa":"Let Me Go","estilo":"Soul / Pop","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":5616,"ingressos":3702,"checkins":3576,"pessoas":3792,"no_show":126,"ocupacao":67.5,"preco":84.36,"rec_ing":301671.36,"rec_ab":93647.7,"rec_merch":29710.59,"nota":8.3,"incidentes":1},{"id":"MUS-0101","data":"2012-10-21","dia":3,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Miike Snow","faixa":"Paddling Out","estilo":"Indie Pop","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":2300,"ingressos":1775,"checkins":1606,"pessoas":1728,"no_show":169,"ocupacao":75.1,"preco":114.56,"rec_ing":183983.36,"rec_ab":43109.96,"rec_merch":13807.11,"nota":8.7,"incidentes":1},{"id":"MUS-0102","data":"2012-10-22","dia":4,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Pulse","artista":"Noah and the Whale","faixa":"Life is Life (Yuksek Remix)","estilo":"Indie Electronic","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1296,"ingressos":928,"checkins":894,"pessoas":963,"no_show":34,"ocupacao":74.3,"preco":137.04,"rec_ing":122513.76,"rec_ab":37171.05,"rec_merch":11323.14,"nota":8.9,"incidentes":0},{"id":"MUS-0103","data":"2012-10-23","dia":5,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Passion Pit","faixa":"Take A Walk","estilo":"Indie Pop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":4600,"ingressos":4123,"checkins":4008,"pessoas":4328,"no_show":115,"ocupacao":94.1,"preco":59.41,"rec_ing":238115.28,"rec_ab":83033.23,"rec_merch":48709.94,"nota":8.3,"incidentes":1},{"id":"MUS-0104","data":"2012-10-24","dia":6,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Pulse","artista":"Phoenix","faixa":"1901","estilo":"Indie Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4536,"ingressos":3091,"checkins":2800,"pessoas":2920,"no_show":291,"ocupacao":64.4,"preco":88.28,"rec_ing":247184.0,"rec_ab":66891.49,"rec_merch":19884.13,"nota":8.8,"incidentes":1},{"id":"MUS-0105","data":"2012-10-25","dia":7,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Sam and the Womp","faixa":"Bom Bom","estilo":"Dance Pop","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":1500,"ingressos":1139,"checkins":997,"pessoas":1066,"no_show":142,"ocupacao":71.1,"preco":117.2,"rec_ing":116848.4,"rec_ab":32688.32,"rec_merch":5420.59,"nota":8.1,"incidentes":0},{"id":"MUS-0106","data":"2012-10-19","dia":1,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Santigold","faixa":"Disparate Youth","estilo":"Alternative Pop","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":6400,"ingressos":5184,"checkins":4905,"pessoas":5221,"no_show":279,"ocupacao":81.6,"preco":46.55,"rec_ing":228327.75,"rec_ab":129915.72,"rec_merch":39188.17,"nota":8.3,"incidentes":1},{"id":"MUS-0107","data":"2012-10-20","dia":2,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Tesla Boy","faixa":"Spirit of the Night","estilo":"Synthpop","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":5304,"ingressos":5304,"checkins":5140,"pessoas":5304,"no_show":164,"ocupacao":100.0,"preco":83.7,"rec_ing":430218.0,"rec_ab":80380.96,"rec_merch":38322.25,"nota":8.2,"incidentes":1},{"id":"MUS-0108","data":"2012-10-21","dia":3,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"The Maccabees","faixa":"Pelican","estilo":"Indie Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":2944,"ingressos":2499,"checkins":2376,"pessoas":2521,"no_show":123,"ocupacao":85.6,"preco":102.01,"rec_ing":242375.76,"rec_ab":62985.53,"rec_merch":6751.35,"nota":9.6,"incidentes":0},{"id":"MUS-0109","data":"2012-10-22","dia":4,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"The Naked & Famous","faixa":"Punching in a Dream","estilo":"Indie Electronic","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1224,"ingressos":1061,"checkins":970,"pessoas":1036,"no_show":91,"ocupacao":84.6,"preco":134.67,"rec_ing":130629.9,"rec_ab":31692.68,"rec_merch":11916.42,"nota":7.5,"incidentes":0},{"id":"MUS-0110","data":"2012-10-23","dia":5,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Tom Vek","faixa":"Aroused","estilo":"Indie Electronic","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":5888,"ingressos":4566,"checkins":4242,"pessoas":4400,"no_show":324,"ocupacao":74.7,"preco":66.34,"rec_ing":281414.28,"rec_ab":77840.63,"rec_merch":25191.66,"nota":8.3,"incidentes":1},{"id":"MUS-0111","data":"2012-10-24","dia":6,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Two Door Cinema Club","faixa":"Something Good Can Work (The Twelves Remix)","estilo":"Indie Dance","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4284,"ingressos":3596,"checkins":3463,"pessoas":3676,"no_show":133,"ocupacao":85.8,"preco":91.92,"rec_ing":318318.96,"rec_ab":128518.65,"rec_merch":14347.62,"nota":8.9,"incidentes":1},{"id":"MUS-0112","data":"2012-10-25","dia":7,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Willy Moon","faixa":"Yeah Yeah","estilo":"Indie Pop","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":1920,"ingressos":1333,"checkins":1278,"pessoas":1363,"no_show":55,"ocupacao":71.0,"preco":121.5,"rec_ing":155277.0,"rec_ab":38570.47,"rec_merch":12227.16,"nota":9.2,"incidentes":0},{"id":"MUS-0113","data":"2012-10-19","dia":1,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"Arctic Monkeys","faixa":"R U Mine?","estilo":"Indie Rock","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":24000,"ingressos":24000,"checkins":22585,"pessoas":24000,"no_show":1415,"ocupacao":100.0,"preco":45.96,"rec_ing":1038006.6,"rec_ab":417996.37,"rec_merch":122625.6,"nota":9.2,"incidentes":6},{"id":"MUS-0114","data":"2012-10-20","dia":2,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Rocks","artista":"The Black Keys","faixa":"Lonely Boy","estilo":"Blues Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":8580,"ingressos":6464,"checkins":5995,"pessoas":6240,"no_show":469,"ocupacao":72.7,"preco":82.03,"rec_ing":491769.85,"rec_ab":160426.72,"rec_merch":50817.05,"nota":7.9,"incidentes":2},{"id":"MUS-0115","data":"2012-10-21","dia":3,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"Four Year Strong","faixa":"The Infected","estilo":"Pop Punk","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":11040,"ingressos":11040,"checkins":9907,"pessoas":10263,"no_show":1133,"ocupacao":93.0,"preco":105.5,"rec_ing":1045188.5,"rec_ab":208836.73,"rec_merch":31690.09,"nota":9.6,"incidentes":3},{"id":"MUS-0116","data":"2012-10-22","dia":4,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Rocks","artista":"Howler","faixa":"Back of Your Neck","estilo":"Indie Rock","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1980,"ingressos":1520,"checkins":1367,"pessoas":1440,"no_show":153,"ocupacao":72.7,"preco":138.91,"rec_ing":189889.97,"rec_ab":53514.29,"rec_merch":11942.14,"nota":7.5,"incidentes":1},{"id":"MUS-0117","data":"2012-10-23","dia":5,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"LCD Soundsystem","faixa":"Give It Up","estilo":"Dance Punk","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":22080,"ingressos":17367,"checkins":15520,"pessoas":16467,"no_show":1847,"ocupacao":74.6,"preco":59.92,"rec_ing":929958.4,"rec_ab":242329.23,"rec_merch":85618.46,"nota":8.3,"incidentes":2},{"id":"MUS-0118","data":"2012-10-24","dia":6,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Rocks","artista":"Lostprophets","faixa":"Bring Em Down","estilo":"Alternative Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":6930,"ingressos":6930,"checkins":6121,"pessoas":6409,"no_show":809,"ocupacao":92.5,"preco":99.83,"rec_ing":611059.43,"rec_ab":138026.14,"rec_merch":56336.93,"nota":9.2,"incidentes":2},{"id":"MUS-0119","data":"2012-10-25","dia":7,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Rocks","artista":"Lostprophets","faixa":"We Bring An Arsenal","estilo":"Alternative Rock","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":7200,"ingressos":4726,"checkins":4330,"pessoas":4615,"no_show":396,"ocupacao":64.1,"preco":124.38,"rec_ing":538565.4,"rec_ab":166758.73,"rec_merch":41587.78,"nota":7.6,"incidentes":0},{"id":"MUS-0120","data":"2012-10-19","dia":1,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"Mona","faixa":"Teenager","estilo":"Alternative Rock","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":8200,"ingressos":6576,"checkins":6161,"pessoas":6445,"no_show":415,"ocupacao":78.6,"preco":49.78,"rec_ing":306694.58,"rec_ab":140499.35,"rec_merch":77338.57,"nota":8.8,"incidentes":2},{"id":"MUS-0121","data":"2012-10-20","dia":2,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Rocks","artista":"Neon Trees","faixa":"Animal","estilo":"Alternative Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":7410,"ingressos":7105,"checkins":6548,"pessoas":6936,"no_show":557,"ocupacao":93.6,"preco":82.27,"rec_ing":538703.96,"rec_ab":219548.86,"rec_merch":56693.76,"nota":8.7,"incidentes":2},{"id":"MUS-0122","data":"2012-10-21","dia":3,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"Pulled Apart By Horses","faixa":"Wildfire, Smoke & Doom","estilo":"Alternative Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3772,"ingressos":3462,"checkins":3148,"pessoas":3394,"no_show":314,"ocupacao":90.0,"preco":106.75,"rec_ing":336049.0,"rec_ab":84137.67,"rec_merch":22807.3,"nota":8.3,"incidentes":1},{"id":"MUS-0123","data":"2012-10-22","dia":4,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Rocks","artista":"Silversun Pickups","faixa":"Lazy Eye","estilo":"Alternative Rock","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1710,"ingressos":1390,"checkins":1277,"pessoas":1342,"no_show":113,"ocupacao":78.5,"preco":141.66,"rec_ing":180899.82,"rec_ab":30828.65,"rec_merch":10627.28,"nota":7.5,"incidentes":0},{"id":"MUS-0124","data":"2012-10-23","dia":5,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"The Duke Spirit","faixa":"Surrender","estilo":"Alternative Rock","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":7544,"ingressos":7201,"checkins":6640,"pessoas":6950,"no_show":561,"ocupacao":92.1,"preco":70.22,"rec_ing":466260.8,"rec_ab":88292.61,"rec_merch":59708.85,"nota":9.1,"incidentes":1},{"id":"MUS-0125","data":"2012-10-24","dia":6,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Rocks","artista":"The Enemy","faixa":"Away from Here","estilo":"Indie Rock","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":5985,"ingressos":3974,"checkins":3521,"pessoas":3787,"no_show":453,"ocupacao":63.3,"preco":90.82,"rec_ing":319777.22,"rec_ab":99774.28,"rec_merch":25206.23,"nota":8.9,"incidentes":0},{"id":"MUS-0126","data":"2012-10-25","dia":7,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"The Enemy","faixa":"Had Enough","estilo":"Indie Rock","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2460,"ingressos":2002,"checkins":1878,"pessoas":1928,"no_show":124,"ocupacao":78.4,"preco":118.3,"rec_ing":222167.4,"rec_ab":64687.85,"rec_merch":5336.28,"nota":9.6,"incidentes":0},{"id":"MUS-0127","data":"2012-10-19","dia":1,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Rocks","artista":"The Hives","faixa":"Hate To Say I Told You So","estilo":"Garage Rock","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":7200,"ingressos":6476,"checkins":5775,"pessoas":5979,"no_show":701,"ocupacao":83.0,"preco":54.75,"rec_ing":316181.25,"rec_ab":87257.79,"rec_merch":40428.29,"nota":8.8,"incidentes":1},{"id":"MUS-0128","data":"2012-10-20","dia":2,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Rocks","artista":"The Stone Roses","faixa":"She Bangs The Drums","estilo":"Alternative Rock","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":3900,"ingressos":2847,"checkins":2526,"pessoas":2692,"no_show":321,"ocupacao":69.0,"preco":74.56,"rec_ing":188338.56,"rec_ab":45032.39,"rec_merch":7951.14,"nota":7.5,"incidentes":1},{"id":"MUS-0129","data":"2012-10-21","dia":3,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Rocks","artista":"The Subways","faixa":"Rock & Roll Queen","estilo":"Indie Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3312,"ingressos":2704,"checkins":2604,"pessoas":2806,"no_show":100,"ocupacao":84.7,"preco":109.85,"rec_ing":286049.4,"rec_ab":81641.73,"rec_merch":14779.44,"nota":9.1,"incidentes":0},{"id":"MUS-0130","data":"2012-10-22","dia":4,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Rocks","artista":"TOY","faixa":"Motoring","estilo":"PSYCHEDELIC ROCK","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":900,"ingressos":778,"checkins":743,"pessoas":796,"no_show":35,"ocupacao":88.4,"preco":129.95,"rec_ing":96552.85,"rec_ab":22096.82,"rec_merch":9463.76,"nota":7.9,"incidentes":0},{"id":"MUS-0131","data":"2012-10-23","dia":5,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Rocks","artista":"Wavves","faixa":"Bug","estilo":"Noise Pop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":6624,"ingressos":5445,"checkins":4945,"pessoas":5330,"no_show":500,"ocupacao":80.5,"preco":64.0,"rec_ing":316480.0,"rec_ab":60910.54,"rec_merch":46597.48,"nota":9.2,"incidentes":1},{"id":"MUS-0132","data":"2012-10-24","dia":6,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Rocks","artista":"White Lies","faixa":"Farewell to the Fairground","estilo":"Post Punk","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":3150,"ingressos":2977,"checkins":2860,"pessoas":2988,"no_show":117,"ocupacao":94.9,"preco":98.63,"rec_ing":282081.8,"rec_ab":100472.97,"rec_merch":21053.59,"nota":8.6,"incidentes":1},{"id":"MUS-0133","data":"2012-10-25","dia":7,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Rocks","artista":"You Me At Six","faixa":"Bite My Tongue (feat. Oli Sykes)","estilo":"Post Hardcore","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2160,"ingressos":2004,"checkins":1755,"pessoas":1805,"no_show":249,"ocupacao":83.6,"preco":127.4,"rec_ing":223587.0,"rec_ab":36800.61,"rec_merch":11341.05,"nota":8.8,"incidentes":0},{"id":"MUS-0134","data":"2012-10-19","dia":1,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Rocks","artista":"Yuck","faixa":"Get Away","estilo":"Indie Rock","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":6800,"ingressos":4323,"checkins":3921,"pessoas":4148,"no_show":402,"ocupacao":61.0,"preco":57.12,"rec_ing":223967.52,"rec_ab":58133.43,"rec_merch":24872.16,"nota":9.3,"incidentes":0},{"id":"MUS-0135","data":"2012-10-20","dia":2,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Bass Arena","artista":"Avicii","faixa":"Levels (Skrillex Mix)","estilo":"EDM","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":4992,"ingressos":4992,"checkins":4664,"pessoas":4992,"no_show":328,"ocupacao":100.0,"preco":78.14,"rec_ing":364444.96,"rec_ab":126137.51,"rec_merch":16397.77,"nota":7.9,"incidentes":1},{"id":"MUS-0136","data":"2012-10-21","dia":3,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Azari & III","faixa":"Reckless (With Your Love)","estilo":"Electro / House","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3128,"ingressos":3128,"checkins":2990,"pessoas":3106,"no_show":138,"ocupacao":99.3,"preco":110.25,"rec_ing":329647.5,"rec_ab":68755.49,"rec_merch":20338.41,"nota":8.3,"incidentes":0},{"id":"MUS-0137","data":"2012-10-22","dia":4,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Bass Arena","artista":"Benny Benassi","faixa":"Cinema (Skrillex Remix)","estilo":"Electro House","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1152,"ingressos":735,"checkins":649,"pessoas":690,"no_show":86,"ocupacao":59.9,"preco":137.95,"rec_ing":89529.55,"rec_ab":17887.83,"rec_merch":6124.61,"nota":7.9,"incidentes":0},{"id":"MUS-0138","data":"2012-10-23","dia":5,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Chase & Status","faixa":"Blind Faith (feat. Liam Bailey)","estilo":"Drum & Bass","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":6256,"ingressos":5896,"checkins":5649,"pessoas":5845,"no_show":247,"ocupacao":93.4,"preco":59.49,"rec_ing":336059.01,"rec_ab":86250.63,"rec_merch":34953.8,"nota":7.9,"incidentes":1},{"id":"MUS-0139","data":"2012-10-24","dia":6,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Bass Arena","artista":"Chromeo","faixa":"Hot Mess (Duck Sauce Mix)","estilo":"Electro Funk","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4032,"ingressos":3548,"checkins":3206,"pessoas":3453,"no_show":342,"ocupacao":85.6,"preco":95.03,"rec_ing":304666.18,"rec_ab":79913.57,"rec_merch":29940.37,"nota":8.5,"incidentes":1},{"id":"MUS-0140","data":"2012-10-25","dia":7,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Bass Arena","artista":"Digitalism","faixa":"Encore","estilo":"Electro","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2040,"ingressos":1910,"checkins":1762,"pessoas":1849,"no_show":148,"ocupacao":90.6,"preco":125.85,"rec_ing":221747.7,"rec_ab":47941.61,"rec_merch":15370.43,"nota":7.7,"incidentes":0},{"id":"MUS-0141","data":"2012-10-19","dia":1,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"DJ Fresh","faixa":"The Power (feat. Dizzee Rascal)","estilo":"Drum & Bass","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":11000,"ingressos":7766,"checkins":7461,"pessoas":7706,"no_show":305,"ocupacao":70.1,"preco":58.96,"rec_ing":439900.56,"rec_ab":248883.4,"rec_merch":91489.17,"nota":8.0,"incidentes":0},{"id":"MUS-0142","data":"2012-10-20","dia":2,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Feed Me","faixa":"Silicone Lube","estilo":"Electro House","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":18720,"ingressos":16033,"checkins":15143,"pessoas":15776,"no_show":890,"ocupacao":84.3,"preco":84.11,"rec_ing":1273677.73,"rec_ab":294672.08,"rec_merch":69561.33,"nota":9.2,"incidentes":4},{"id":"MUS-0143","data":"2012-10-21","dia":3,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Fenech-Soler","faixa":"Lies (Alex Metric Remix)","estilo":"Indietronica","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":5060,"ingressos":3194,"checkins":2928,"pessoas":3106,"no_show":266,"ocupacao":61.4,"preco":109.57,"rec_ing":320820.96,"rec_ab":47447.99,"rec_merch":37260.05,"nota":8.3,"incidentes":0},{"id":"MUS-0144","data":"2012-10-22","dia":4,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Madeon","faixa":"Icarus","estilo":"Electro House","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":4320,"ingressos":4107,"checkins":3649,"pessoas":3793,"no_show":458,"ocupacao":87.8,"preco":135.3,"rec_ing":493709.7,"rec_ab":107712.45,"rec_merch":41118.48,"nota":8.7,"incidentes":0},{"id":"MUS-0145","data":"2012-10-23","dia":5,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Modestep","faixa":"Show Me A Sign","estilo":"Dubstep","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":10120,"ingressos":7066,"checkins":6172,"pessoas":6571,"no_show":894,"ocupacao":64.9,"preco":70.64,"rec_ing":435990.08,"rec_ab":130099.8,"rec_merch":26538.21,"nota":8.9,"incidentes":1},{"id":"MUS-0146","data":"2012-10-24","dia":6,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Bass Arena","artista":"Mord Fustang","faixa":"Lick The Rainbow","estilo":"Electro House","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":15120,"ingressos":15120,"checkins":13918,"pessoas":14456,"no_show":1202,"ocupacao":95.6,"preco":95.89,"rec_ing":1334597.02,"rec_ab":293881.9,"rec_merch":77727.51,"nota":7.7,"incidentes":3},{"id":"MUS-0147","data":"2012-10-25","dia":7,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Bass Arena","artista":"Mr Magnetik","faixa":"Remanence (Junior Remix)","estilo":"Electronic","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":3300,"ingressos":2285,"checkins":2001,"pessoas":2094,"no_show":284,"ocupacao":63.5,"preco":126.8,"rec_ing":253726.8,"rec_ab":65923.29,"rec_merch":5799.43,"nota":9.4,"incidentes":0},{"id":"MUS-0148","data":"2012-10-19","dia":1,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Nero","faixa":"Me & You","estilo":"Dubstep","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":9500,"ingressos":8246,"checkins":7476,"pessoas":7989,"no_show":770,"ocupacao":84.1,"preco":51.97,"rec_ing":388527.72,"rec_ab":164130.09,"rec_merch":92577.94,"nota":7.3,"incidentes":2},{"id":"MUS-0149","data":"2012-10-20","dia":2,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Nero","faixa":"Reaching Out (Fred Falke Remix)","estilo":"Electronic","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":6396,"ingressos":5849,"checkins":5520,"pessoas":5677,"no_show":329,"ocupacao":88.8,"preco":78.82,"rec_ing":435086.4,"rec_ab":114991.1,"rec_merch":21940.77,"nota":8.9,"incidentes":0},{"id":"MUS-0150","data":"2012-10-21","dia":3,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"New Order","faixa":"Blue Monday","estilo":"New Wave","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":4370,"ingressos":4370,"checkins":4102,"pessoas":4313,"no_show":268,"ocupacao":98.7,"preco":105.47,"rec_ing":432637.94,"rec_ab":92931.73,"rec_merch":20940.6,"nota":8.9,"incidentes":1},{"id":"MUS-0151","data":"2012-10-22","dia":4,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Porter Robinson","faixa":"Language","estilo":"Progressive House","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1476,"ingressos":1158,"checkins":1054,"pessoas":1106,"no_show":104,"ocupacao":74.9,"preco":140.39,"rec_ing":147971.06,"rec_ab":43552.01,"rec_merch":4759.59,"nota":9.7,"incidentes":2},{"id":"MUS-0152","data":"2012-10-23","dia":5,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Rusko","faixa":"Everyday (Netsky VIP Remix)","estilo":"Drum & Bass","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":8740,"ingressos":7173,"checkins":6331,"pessoas":6660,"no_show":842,"ocupacao":76.2,"preco":66.08,"rec_ing":418352.48,"rec_ab":176146.81,"rec_merch":38977.67,"nota":9.2,"incidentes":1},{"id":"MUS-0153","data":"2012-10-24","dia":6,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Bass Arena","artista":"Rusko","faixa":"Somebody to Love (Sigma Remix)","estilo":"Drum & Bass","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":5166,"ingressos":5162,"checkins":4678,"pessoas":4927,"no_show":484,"ocupacao":95.4,"preco":93.03,"rec_ing":435194.34,"rec_ab":170500.76,"rec_merch":48070.96,"nota":8.1,"incidentes":1},{"id":"MUS-0154","data":"2012-10-25","dia":7,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Bass Arena","artista":"Scuba","faixa":"The Hope","estilo":"Techno","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":2850,"ingressos":2465,"checkins":2352,"pessoas":2476,"no_show":113,"ocupacao":86.9,"preco":125.7,"rec_ing":295646.4,"rec_ab":66291.9,"rec_merch":22194.34,"nota":9.8,"incidentes":1},{"id":"MUS-0155","data":"2012-10-19","dia":1,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Bass Arena","artista":"The Hacker","faixa":"Bass 4","estilo":"Electro","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":5000,"ingressos":3946,"checkins":3518,"pessoas":3716,"no_show":428,"ocupacao":74.3,"preco":47.79,"rec_ing":168125.22,"rec_ab":76275.22,"rec_merch":10889.3,"nota":8.9,"incidentes":1},{"id":"MUS-0156","data":"2012-10-20","dia":2,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Bass Arena","artista":"Wolfgang Gartner","faixa":"Illmerica (Extended Version)","estilo":"Electro House","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":5616,"ingressos":4625,"checkins":4287,"pessoas":4554,"no_show":338,"ocupacao":81.1,"preco":86.04,"rec_ing":368853.48,"rec_ab":82418.39,"rec_merch":38056.66,"nota":9.0,"incidentes":0},{"id":"MUS-0157","data":"2012-10-21","dia":3,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Cut Copy","faixa":"Need You Now","estilo":"Indietronica","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":2300,"ingressos":1927,"checkins":1775,"pessoas":1876,"no_show":152,"ocupacao":81.6,"preco":112.42,"rec_ing":199545.5,"rec_ab":45326.91,"rec_merch":22153.74,"nota":7.5,"incidentes":0},{"id":"MUS-0158","data":"2012-10-22","dia":4,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Pulse","artista":"Electric Guest","faixa":"Awake","estilo":"Indie Pop","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1296,"ingressos":1207,"checkins":1089,"pessoas":1124,"no_show":118,"ocupacao":86.7,"preco":139.1,"rec_ing":151479.9,"rec_ab":27277.69,"rec_merch":9526.73,"nota":7.6,"incidentes":0},{"id":"MUS-0159","data":"2012-10-23","dia":5,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Empire of the Sun","faixa":"Walking on a Dream","estilo":"Synthpop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":4600,"ingressos":3144,"checkins":2840,"pessoas":2967,"no_show":304,"ocupacao":64.5,"preco":61.67,"rec_ing":175142.8,"rec_ab":57986.49,"rec_merch":19057.4,"nota":8.7,"incidentes":1},{"id":"MUS-0160","data":"2012-10-24","dia":6,"regiao":"Red Rock","local":"Red Rock Canyon","palco":"Palco Canyon","radio":"Horizon Pulse","artista":"Fixers","faixa":"Iron Deer Dream (Chad Valley Remix)","estilo":"Indie Electronic","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4536,"ingressos":4004,"checkins":3705,"pessoas":3986,"no_show":299,"ocupacao":87.9,"preco":94.26,"rec_ing":349233.3,"rec_ab":122999.61,"rec_merch":28079.47,"nota":7.3,"incidentes":2},{"id":"MUS-0161","data":"2012-10-25","dia":7,"regiao":"Finley Dam","local":"Finley Dam Deck","palco":"Palco Dam","radio":"Horizon Pulse","artista":"Foster The People","faixa":"Don't Stop (Color on the Walls)","estilo":"Indie Pop","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":1500,"ingressos":1226,"checkins":1126,"pessoas":1195,"no_show":100,"ocupacao":79.7,"preco":123.54,"rec_ing":139106.04,"rec_ab":21024.39,"rec_merch":9323.18,"nota":8.8,"incidentes":2},{"id":"MUS-0162","data":"2012-10-19","dia":1,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Friendly Fires","faixa":"Hawaiian Air","estilo":"Indie Dance","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":6400,"ingressos":4787,"checkins":4522,"pessoas":4732,"no_show":265,"ocupacao":73.9,"preco":51.72,"rec_ing":233877.84,"rec_ab":122978.12,"rec_merch":44271.7,"nota":8.3,"incidentes":2},{"id":"MUS-0163","data":"2012-10-20","dia":2,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Friendly Fires","faixa":"Hurting","estilo":"Indie Dance","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":5304,"ingressos":4527,"checkins":3988,"pessoas":4186,"no_show":539,"ocupacao":78.9,"preco":77.07,"rec_ing":307355.16,"rec_ab":85206.81,"rec_merch":24238.84,"nota":8.0,"incidentes":1},{"id":"MUS-0164","data":"2012-10-21","dia":3,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Hooray for Earth","faixa":"No Love","estilo":"Indie Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":2944,"ingressos":2431,"checkins":2318,"pessoas":2466,"no_show":113,"ocupacao":83.8,"preco":102.92,"rec_ing":238568.56,"rec_ab":69711.74,"rec_merch":11845.06,"nota":8.1,"incidentes":0},{"id":"MUS-0165","data":"2012-10-22","dia":4,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Hot Chip","faixa":"Over & Over","estilo":"Indietronica","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1224,"ingressos":1094,"checkins":1060,"pessoas":1115,"no_show":34,"ocupacao":91.1,"preco":138.54,"rec_ing":146852.4,"rec_ab":27330.51,"rec_merch":13146.02,"nota":9.0,"incidentes":1},{"id":"MUS-0166","data":"2012-10-23","dia":5,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Ladyhawke","faixa":"Black, White and Blue","estilo":"Synthpop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":5888,"ingressos":5880,"checkins":5439,"pessoas":5788,"no_show":441,"ocupacao":98.3,"preco":63.5,"rec_ing":345376.5,"rec_ab":168181.67,"rec_merch":19389.09,"nota":7.8,"incidentes":0},{"id":"MUS-0167","data":"2012-10-24","dia":6,"regiao":"Redfoot Ranch","local":"Redfoot Ranch Grounds","palco":"Palco Ranch","radio":"Horizon Pulse","artista":"Maverick Sabre","faixa":"Let Me Go","estilo":"Soul / Pop","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":4284,"ingressos":3988,"checkins":3496,"pessoas":3749,"no_show":492,"ocupacao":87.5,"preco":100.07,"rec_ing":349844.72,"rec_ab":63924.15,"rec_merch":37436.11,"nota":8.9,"incidentes":1},{"id":"MUS-0168","data":"2012-10-25","dia":7,"regiao":"Gladstone","local":"Gladstone Outpost","palco":"Palco Norte","radio":"Horizon Pulse","artista":"Miike Snow","faixa":"Paddling Out","estilo":"Indie Pop","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":1920,"ingressos":1910,"checkins":1804,"pessoas":1855,"no_show":106,"ocupacao":96.6,"preco":128.0,"rec_ing":230912.0,"rec_ab":41374.05,"rec_merch":15939.03,"nota":7.2,"incidentes":0},{"id":"MUS-0169","data":"2012-10-19","dia":1,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Noah and the Whale","faixa":"Life is Life (Yuksek Remix)","estilo":"Indie Electronic","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":24000,"ingressos":16264,"checkins":14996,"pessoas":15811,"no_show":1268,"ocupacao":65.9,"preco":47.27,"rec_ing":708860.92,"rec_ab":273360.79,"rec_merch":67495.44,"nota":8.4,"incidentes":2},{"id":"MUS-0170","data":"2012-10-20","dia":2,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Passion Pit","faixa":"Take A Walk","estilo":"Indie Pop","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":8580,"ingressos":7414,"checkins":6639,"pessoas":6938,"no_show":775,"ocupacao":80.9,"preco":84.58,"rec_ing":561526.62,"rec_ab":127686.92,"rec_merch":61456.32,"nota":8.6,"incidentes":2},{"id":"MUS-0171","data":"2012-10-21","dia":3,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Phoenix","faixa":"1901","estilo":"Indie Rock","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":11040,"ingressos":8381,"checkins":7953,"pessoas":8289,"no_show":428,"ocupacao":75.1,"preco":114.36,"rec_ing":909505.08,"rec_ab":192697.77,"rec_merch":21623.01,"nota":7.9,"incidentes":1},{"id":"MUS-0172","data":"2012-10-22","dia":4,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Sam and the Womp","faixa":"Bom Bom","estilo":"Dance Pop","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1980,"ingressos":1280,"checkins":1232,"pessoas":1292,"no_show":48,"ocupacao":65.3,"preco":138.66,"rec_ing":170829.12,"rec_ab":46677.17,"rec_merch":7741.23,"nota":8.8,"incidentes":2},{"id":"MUS-0173","data":"2012-10-23","dia":5,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"Santigold","faixa":"Disparate Youth","estilo":"Alternative Pop","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":22080,"ingressos":18229,"checkins":16902,"pessoas":18250,"no_show":1327,"ocupacao":82.7,"preco":69.6,"rec_ing":1176379.2,"rec_ab":577156.59,"rec_merch":177712.41,"nota":8.1,"incidentes":3},{"id":"MUS-0174","data":"2012-10-24","dia":6,"regiao":"Montano Plains","local":"Montano Fields","palco":"Palco Sunset","radio":"Horizon Pulse","artista":"Tesla Boy","faixa":"Spirit of the Night","estilo":"Synthpop","cor":"Pink","nivel":4,"categoria":"Intermediate","capacidade":6930,"ingressos":6642,"checkins":6109,"pessoas":6441,"no_show":533,"ocupacao":92.9,"preco":87.86,"rec_ing":536736.74,"rec_ab":159401.19,"rec_merch":51145.83,"nota":8.8,"incidentes":2},{"id":"MUS-0175","data":"2012-10-25","dia":7,"regiao":"Main Stage","local":"Festival Central","palco":"Palco Principal","radio":"Horizon Pulse","artista":"The Maccabees","faixa":"Pelican","estilo":"Indie Rock","cor":"Purple","nivel":6,"categoria":"Elite","capacidade":7200,"ingressos":6074,"checkins":5848,"pessoas":6094,"no_show":226,"ocupacao":84.6,"preco":127.58,"rec_ing":746087.84,"rec_ab":119892.87,"rec_merch":22873.65,"nota":7.8,"incidentes":1},{"id":"MUS-0176","data":"2012-10-19","dia":1,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"The Naked & Famous","faixa":"Punching in a Dream","estilo":"Indie Electronic","cor":"Yellow","nivel":1,"categoria":"Rookie","capacidade":8200,"ingressos":7054,"checkins":6379,"pessoas":6639,"no_show":675,"ocupacao":81.0,"preco":56.43,"rec_ing":359966.97,"rec_ab":173194.62,"rec_merch":19453.95,"nota":8.4,"incidentes":1},{"id":"MUS-0177","data":"2012-10-20","dia":2,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Tom Vek","faixa":"Aroused","estilo":"Indie Electronic","cor":"Blue","nivel":3,"categoria":"Intermediate","capacidade":7410,"ingressos":7410,"checkins":6497,"pessoas":6744,"no_show":913,"ocupacao":91.0,"preco":77.02,"rec_ing":500398.94,"rec_ab":91218.89,"rec_merch":57961.22,"nota":8.3,"incidentes":0},{"id":"MUS-0178","data":"2012-10-21","dia":3,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Pulse","artista":"Two Door Cinema Club","faixa":"Something Good Can Work (The Twelves Remix)","estilo":"Indie Dance","cor":"Orange","nivel":5,"categoria":"Advanced","capacidade":3772,"ingressos":2946,"checkins":2596,"pessoas":2757,"no_show":350,"ocupacao":73.1,"preco":106.26,"rec_ing":275850.96,"rec_ab":84482.1,"rec_merch":21017.58,"nota":8.2,"incidentes":0},{"id":"MUS-0179","data":"2012-10-22","dia":4,"regiao":"Carson","local":"Carson Street Hub","palco":"Palco Urbano","radio":"Horizon Pulse","artista":"Willy Moon","faixa":"Yeah Yeah","estilo":"Indie Pop","cor":"Gold","nivel":7,"categoria":"Elite/VIP","capacidade":1710,"ingressos":1191,"checkins":1094,"pessoas":1165,"no_show":97,"ocupacao":68.1,"preco":140.69,"rec_ing":153914.86,"rec_ab":45996.35,"rec_merch":8036.8,"nota":8.4,"incidentes":0},{"id":"MUS-0180","data":"2012-10-23","dia":5,"regiao":"Clear Springs","local":"Clear Springs Park","palco":"Palco Pulse","radio":"Horizon Rocks","artista":"Arctic Monkeys","faixa":"R U Mine?","estilo":"Indie Rock","cor":"Green","nivel":2,"categoria":"Rookie","capacidade":7544,"ingressos":5907,"checkins":5616,"pessoas":5901,"no_show":291,"ocupacao":78.2,"preco":72.12,"rec_ing":405025.92,"rec_ab":124564.78,"rec_merch":60131.44,"nota":7.5,"incidentes":1}],"procedencia":{"base":"data_hygiene/002_clean_evento_2012.csv","registros":180,"script":"scripts/build_dashboard_002.py","qa":"data_hygiene/002_qa_evento_2012.md","gerado_em":"27/08/2026","derivados":{"no_show":12,"pessoas_na_area":11,"dia_festival":10,"receita_ingressos_usd":9,"nivel_pulseira":8,"categoria_pulseira":6}}}</script>
+  <script>
+  (function(){
+    "use strict";
+    const D = JSON.parse(document.getElementById('dados').textContent);
+    const A = D.apresentacoes;
+
+    /* ---------- formatação (pt-BR, via Intl nativo) ---------- */
+    const f0 = new Intl.NumberFormat('pt-BR');
+    const f1 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+    const f2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const int = n => f0.format(Math.round(n || 0));
+    const um = n => f1.format(n || 0);
+    const dois = n => f2.format(n || 0);
+    const dinheiro = n => 'US$ ' + dois(n || 0);
+    const milhoes = n => 'US$ ' + um((n || 0) / 1e6) + ' M';
+    const pct = n => um(n || 0) + '%';
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    const soma = (rows, campo) => rows.reduce((t, r) => t + r[campo], 0);
+    const media = (rows, campo) => rows.length ? soma(rows, campo) / rows.length : 0;
+    const unicos = (rows, campo) => new Set(rows.map(r => r[campo])).size;
+    const receita = rows => soma(rows,'rec_ing') + soma(rows,'rec_ab') + soma(rows,'rec_merch');
+    const corVar = cor => 'var(--p-' + cor.toLowerCase() + ')';
+
+    /* ---------- estado ---------- */
+    let corAtiva = 'TODAS';
+    let palcoAtivo = D.palcos[0];
+
+    const filtradas = () => corAtiva === 'TODAS' ? A : A.filter(a => a.cor === corAtiva);
+
+    /* ---------- agregações ---------- */
+    function agruparPor(rows, campo){
+      const m = new Map();
+      for (const r of rows){
+        let g = m.get(r[campo]);
+        if (!g){ g = {chave:r[campo], linhas:[]}; m.set(r[campo], g); }
+        g.linhas.push(r);
+      }
+      for (const g of m.values()){
+        g.ingressos = soma(g.linhas,'ingressos');
+        g.checkins  = soma(g.linhas,'checkins');
+        g.pessoas   = soma(g.linhas,'pessoas');
+        g.no_show   = soma(g.linhas,'no_show');
+        g.receita   = receita(g.linhas);
+        g.rec_ing   = soma(g.linhas,'rec_ing');
+        g.rec_ab    = soma(g.linhas,'rec_ab');
+        g.rec_merch = soma(g.linhas,'rec_merch');
+        g.apres     = g.linhas.length;
+        g.nota      = media(g.linhas,'nota');
+        g.ocupacao  = media(g.linhas,'ocupacao');
+        g.media_show= g.apres ? g.checkins / g.apres : 0;
+      }
+      return m;
+    }
+
+    /* Palcos sempre na ordem do evento inteiro, com zero quando o filtro de
+       cor não tem apresentação naquele palco — assim o ranking não reordena
+       nem faz palco desaparecer ao trocar de pulseira. */
+    function palcosOrdenados(rows){
+      const m = agruparPor(rows, 'palco');
+      return D.palcos.map(nome => m.get(nome) || {
+        chave:nome, linhas:[], ingressos:0, checkins:0, pessoas:0, no_show:0,
+        receita:0, rec_ing:0, rec_ab:0, rec_merch:0, apres:0, nota:0, ocupacao:0, media_show:0
+      });
+    }
+
+    /* ---------- abertura ---------- */
+    function renderAbertura(){
+      const ing = soma(A,'ingressos'), chk = soma(A,'checkins'), rec = receita(A);
+      const dias = unicos(A,'data'), palcos = D.palcos.length;
+      const artistas = unicos(A,'artista'), faixas = unicos(A,'faixa');
+
+      const datas = A.map(a => a.data).sort();
+      const MES = ['janeiro','fevereiro','março','abril','maio','junho','julho',
+                   'agosto','setembro','outubro','novembro','dezembro'];
+      const diaDe = d => parseInt(d.slice(8,10),10);
+      const mesDe = d => MES[parseInt(d.slice(5,7),10) - 1];
+      const anoDe = d => d.slice(0,4);
+      const ini = datas[0], fim = datas[datas.length - 1];
+      document.getElementById('eyebrowPeriodo').textContent =
+        'Evento musical · ' + diaDe(ini) + ' a ' + diaDe(fim) + ' de ' + mesDe(fim)
+        + ' de ' + anoDe(fim);
+
+      document.getElementById('topReceita').textContent = milhoes(rec);
+      document.getElementById('resumoTopo').textContent =
+        A.length + ' apresentações em ' + dias + ' dias e ' + palcos + ' palcos, com '
+        + artistas + ' artistas e ' + faixas + ' faixas. Cada linha da base é uma '
+        + 'apresentação: quem tocou, onde, para qual pulseira e quanto entrou.';
+
+      const lider = palcosOrdenados(A)[0];
+      document.getElementById('heroTitulo').textContent = int(ing) + ' ingressos emitidos';
+      document.getElementById('heroTexto').textContent =
+        'O festival movimentou ' + milhoes(rec) + ' em ingressos, alimentação e merch. '
+        + 'Um terço dos ingressos saiu de um único palco — o ' + lider.chave
+        + ' — e o público avaliou o evento em ' + dois(media(A,'nota')) + ' de 10.';
+      document.getElementById('heroStats').innerHTML = [
+        ['Dias', int(dias)], ['Palcos', int(palcos)],
+        ['Artistas', int(artistas)], ['Faixas', int(faixas)],
+        ['Apresentações', int(A.length)]
+      ].map(([r,v]) => '<div>' + r + '<b>' + v + '</b></div>').join('');
+
+      document.getElementById('kpiIngressos').innerHTML = int(ing);
+      document.getElementById('kpiIngressosNota').textContent =
+        'Somados nas ' + A.length + ' apresentações. ' + int(chk) + ' viraram check-in e '
+        + int(soma(A,'no_show')) + ' não compareceram.';
+
+      document.getElementById('kpiReceita').innerHTML = milhoes(rec);
+      document.getElementById('kpiReceitaNota').textContent =
+        'Ingressos ' + milhoes(soma(A,'rec_ing')) + ' · A&B ' + milhoes(soma(A,'rec_ab'))
+        + ' · Merch ' + milhoes(soma(A,'rec_merch')) + '.';
+
+      document.getElementById('kpiCheckin').innerHTML = um(chk / ing * 100) + '<small>%</small>';
+      document.getElementById('kpiCheckinNota').textContent =
+        int(chk) + ' check-ins sobre ' + int(ing) + ' ingressos emitidos.';
+
+      document.getElementById('kpiNota').innerHTML = dois(media(A,'nota')) + '<small>/10</small>';
+      const notas = A.map(a => a.nota);
+      document.getElementById('kpiNotaNota').textContent =
+        'Média das ' + A.length + ' apresentações, de ' + um(Math.min.apply(null,notas))
+        + ' a ' + um(Math.max.apply(null,notas)) + '.';
+
+      document.getElementById('kpiOcupacao').innerHTML = um(media(A,'ocupacao')) + '<small>%</small>';
+      document.getElementById('kpiOcupacaoNota').textContent =
+        'Público na área sobre a capacidade. A base não registra ocupação acima de 100%.';
+    }
+
+    /* ---------- ato 1: palcos ---------- */
+    function renderFiltro(){
+      const alvo = document.getElementById('filtroCores');
+      const itens = ['TODAS'].concat(D.cores);
+      alvo.innerHTML = itens.map(cor => {
+        const ativa = cor === corAtiva ? ' active' : '';
+        const bola = cor === 'TODAS' ? ''
+          : '<i class="dot" style="background:' + corVar(cor) + '"></i>';
+        return '<button class="tab' + ativa + '" data-cor="' + esc(cor) + '" aria-pressed="'
+             + (cor === corAtiva) + '">' + bola + esc(cor) + '</button>';
+      }).join('');
+      alvo.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => { corAtiva = b.dataset.cor; renderAto1(); });
+      });
+    }
+
+    function renderRankingPalcos(){
+      const palcos = palcosOrdenados(filtradas());
+      const maxIng = Math.max.apply(null, palcos.map(p => p.ingressos).concat([1]));
+      const totalIng = soma(filtradas(),'ingressos');
+
+      document.getElementById('rankingLabel').textContent =
+        'Ingressos emitidos por palco' + (corAtiva === 'TODAS' ? '' : ' · pulseira ' + corAtiva);
+
+      document.getElementById('rankingPalcos').innerHTML = palcos.map((p, i) => {
+        const share = totalIng ? p.ingressos / totalIng * 100 : 0;
+        const largura = p.ingressos / maxIng * 100;
+        const classes = ['hbar'];
+        if (i === 0 && p.ingressos > 0) classes.push('lider');
+        if (p.chave === palcoAtivo) classes.push('is-selected');
+        const valor = p.ingressos > 0
+          ? '<span class="valor">' + int(p.ingressos) + '</span>'
+          : '<span class="valor zero">sem show</span>';
+        return '<button class="' + classes.join(' ') + '" role="listitem" data-palco="'
+          + esc(p.chave) + '" aria-pressed="' + (p.chave === palcoAtivo) + '">'
+          + '<span class="nome">' + esc(p.chave) + '</span>'
+          + '<span class="trilha"><span class="fill" style="width:' + um(largura) + '%"></span></span>'
+          + valor + '</button>';
+      }).join('');
+
+      document.getElementById('rankingPalcos').querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => { palcoAtivo = b.dataset.palco; renderAto1(); });
+      });
+
+      const lider = palcos[0];
+      const shareLider = totalIng ? lider.ingressos / totalIng * 100 : 0;
+      const shareApres = filtradas().length ? lider.apres / filtradas().length * 100 : 0;
+      document.getElementById('rankingNota').textContent = lider.ingressos === 0
+        ? 'Nenhuma apresentação de pulseira ' + corAtiva + ' nos palcos listados.'
+        : lider.chave + ' concentra ' + um(shareLider) + '% dos ingressos com '
+          + um(shareApres) + '% das apresentações' + (corAtiva === 'TODAS' ? '' : ' de pulseira ' + corAtiva)
+          + '. Clique num palco para abrir o detalhe.';
+      document.getElementById('ato1Selo').textContent =
+        D.palcos.length + ' palcos · ' + filtradas().length + ' apresentações no filtro';
+    }
+
+    function renderPulseiras(){
+      const grupos = agruparPor(A, 'cor');
+      const linhas = D.cores.map(c => grupos.get(c)).filter(Boolean)
+                            .sort((a,b) => b.ingressos - a.ingressos);
+      const maxIng = Math.max.apply(null, linhas.map(l => l.ingressos).concat([1]));
+      const total = soma(A,'ingressos');
+
+      document.getElementById('pulseiraLabel').textContent =
+        'Ingressos e receita por cor de pulseira · evento inteiro';
+      document.getElementById('rankingPulseiras').innerHTML = linhas.map(l => {
+        const ativa = l.chave === corAtiva ? ' is-selected' : '';
+        return '<button class="hbar' + ativa + '" role="listitem" data-cor="' + esc(l.chave) + '"'
+          + ' aria-pressed="' + (l.chave === corAtiva) + '">'
+          + '<span class="nome"><span class="chip"><i style="background:' + corVar(l.chave)
+          + '"></i>' + esc(l.chave) + '</span></span>'
+          + '<span class="trilha"><span class="fill" style="width:'
+          + um(l.ingressos / maxIng * 100) + '%;background:linear-gradient(90deg,'
+          + corVar(l.chave) + ',' + corVar(l.chave) + ')"></span></span>'
+          + '<span class="valor">' + int(l.ingressos) + '</span></button>';
+      }).join('');
+      document.getElementById('rankingPulseiras').querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => { corAtiva = b.dataset.cor; renderAto1(); });
+      });
+
+      const top = linhas[0], fundo = linhas[linhas.length - 1];
+      document.getElementById('pulseiraNota').textContent =
+        top.chave + ' lidera em volume com ' + int(top.ingressos) + ' ingressos ('
+        + um(top.ingressos / total * 100) + '%), mas rende ' + dinheiro(top.rec_ing / top.ingressos)
+        + ' por ingresso, contra ' + dinheiro(fundo.rec_ing / fundo.ingressos) + ' da '
+        + fundo.chave + ' — a pulseira mais alta vende menos e vale mais. Clique numa cor para filtrar o ranking acima.';
+    }
+
+    function renderDrilldown(){
+      const rows = filtradas().filter(a => a.palco === palcoAtivo);
+      const idx = D.palcos.indexOf(palcoAtivo);
+      document.getElementById('drillKicker').textContent = String(idx + 1).padStart(2,'0');
+      document.getElementById('drillNome').textContent = palcoAtivo;
+
+      if (!rows.length){
+        document.getElementById('drillKv').innerHTML =
+          '<dt>Apresentações</dt><dd>0</dd>';
+        document.getElementById('drillAtracoes').innerHTML =
+          '<p class="note">Nenhuma apresentação de pulseira ' + esc(corAtiva)
+          + ' neste palco. Troque a pulseira ou escolha outro palco.</p>';
+        return;
+      }
+
+      const g = agruparPor(rows,'palco').get(palcoAtivo);
+      document.getElementById('drillKv').innerHTML = [
+        ['Apresentações', int(g.apres)],
+        ['Ingressos', int(g.ingressos)],
+        ['Check-ins', int(g.checkins)],
+        ['Receita total', dinheiro(g.receita)],
+        ['— ingressos', dinheiro(g.rec_ing)],
+        ['— alim. e bebidas', dinheiro(g.rec_ab)],
+        ['— merch', dinheiro(g.rec_merch)],
+        ['Ocupação média', pct(g.ocupacao)],
+        ['Nota do público', dois(g.nota) + '/10']
+      ].map(([k,v]) => '<dt>' + k + '</dt><dd>' + v + '</dd>').join('');
+
+      const artistas = [...agruparPor(rows,'artista').values()]
+        .sort((a,b) => b.checkins - a.checkins).slice(0,5);
+      document.getElementById('drillAtracoes').innerHTML =
+        '<table class="mini-table"><thead><tr><th></th><th>Artista</th><th style="text-align:right">Público</th></tr></thead><tbody>'
+        + artistas.map((a,i) => {
+            const melhor = a.linhas.slice().sort((x,y) => y.checkins - x.checkins)[0];
+            return '<tr><td class="rank">' + (i+1) + '</td><td>' + esc(a.chave)
+              + '<span class="sub">' + esc(melhor.faixa) + ' · nota ' + dois(a.nota) + '</span></td>'
+              + '<td class="num">' + int(a.checkins) + '</td></tr>';
+          }).join('')
+        + '</tbody></table>';
+    }
+
+    function renderAto1(){
+      renderFiltro();
+      renderRankingPalcos();
+      renderPulseiras();
+      renderDrilldown();
+      document.getElementById('ato1Lede').innerHTML =
+        'O ranking abaixo responde <b>qual palco vendeu mais ingressos</b>. Filtre por cor de '
+        + 'pulseira para ver a composição da venda, e clique num palco para abrir receita e '
+        + 'principais atrações.';
+    }
+
+    /* ---------- ato 2: artistas ---------- */
+    function renderAto2(){
+      const grupos = [...agruparPor(A,'artista').values()];
+      const porTotal = grupos.slice().sort((a,b) => b.checkins - a.checkins);
+      const porMedia = grupos.slice().sort((a,b) => b.media_show - a.media_show);
+      const top3 = porTotal.slice(0,3);
+
+      document.getElementById('ato2Selo').textContent =
+        grupos.length + ' artistas · ranking por check-ins somados';
+      document.getElementById('ato2Lede').innerHTML =
+        'Público aqui é <b>check-in</b>: gente que efetivamente entrou, não ingresso emitido. '
+        + 'Somando todas as apresentações de cada artista, o pódio é este.';
+
+      document.getElementById('podio').innerHTML = top3.map((a,i) => {
+        const melhor = a.linhas.slice().sort((x,y) => y.checkins - x.checkins)[0];
+        return '<article class="pos p' + (i+1) + '">'
+          + '<div class="lugar">' + (i+1) + 'º lugar</div>'
+          + '<h3>' + esc(a.chave) + '</h3>'
+          + '<div class="publico">' + int(a.checkins) + '<small> check-ins</small></div>'
+          + '<div class="faixa">' + a.apres + ' apresentações · média de ' + int(a.media_show)
+          + ' por show<br/>Maior público com <b>' + esc(melhor.faixa) + '</b> no '
+          + esc(melhor.palco) + '</div></article>';
+      }).join('');
+
+      const primeiro = porTotal[0], campeaoMedia = porMedia[0];
+      document.getElementById('ressalvaTexto').textContent =
+        primeiro.chave + ' lidera em volume, mas com ' + primeiro.apres + ' apresentações contra '
+        + campeaoMedia.apres + ' de ' + campeaoMedia.chave + '. Dividindo pelo número de shows, o '
+        + 'pódio muda inteiro: quem enche mais uma casa não é quem soma mais no total. As duas '
+        + 'leituras estão certas — a pergunta é qual delas você quer responder.';
+      document.getElementById('tabelaMedia').innerHTML =
+        '<thead><tr><th></th><th>Artista</th><th style="text-align:right">Média por show</th>'
+        + '<th style="text-align:right">Shows</th><th style="text-align:right">Total</th></tr></thead><tbody>'
+        + porMedia.slice(0,3).map((a,i) =>
+            '<tr><td class="rank">' + (i+1) + '</td><td>' + esc(a.chave) + '</td>'
+            + '<td class="num">' + int(a.media_show) + '</td>'
+            + '<td class="num">' + a.apres + '</td>'
+            + '<td class="num">' + int(a.checkins) + '</td></tr>').join('')
+        + '</tbody></table>';
+    }
+
+    /* ---------- ato 3: músicas ---------- */
+    function renderAto3(){
+      const grupos = [...agruparPor(A,'faixa').values()];
+      const N = 6;
+      /* Desempate: notas medias iguais na tela (2 casas) tem de desempatar por
+         publico, e nao pelo ruido de ponto flutuante da media -- sem arredondar
+         antes, 9.0666666666666 e 9.0666666666668 viram ordem inexplicavel. */
+      const cmpNota = (a,b) => Math.round(b.nota * 100) - Math.round(a.nota * 100);
+      const amadas = grupos.slice().sort((a,b) => cmpNota(a,b) || b.checkins - a.checkins).slice(0,N);
+      const lotadas = grupos.slice().sort((a,b) => b.checkins - a.checkins).slice(0,N);
+      const nasDuas = new Set(amadas.map(a => a.chave).filter(k => lotadas.some(l => l.chave === k)));
+
+      document.getElementById('ato3Selo').textContent =
+        grupos.length + ' faixas · top ' + N + ' em cada leitura';
+      document.getElementById('ato3Lede').innerHTML =
+        '"Queridinha" tem duas leituras que <b>discordam</b>: a faixa mais bem avaliada não é a '
+        + 'que levou mais gente. Em vez de escolher uma e esconder a outra, as duas estão aqui. '
+        + '(Frequência de execução não entra: toda faixa tocou 2 ou 3 vezes, então não distingue nada.)';
+
+      const artistaDa = g => g.linhas[0].artista;
+      const monta = (lista, valor, rotulo) =>
+        '<thead><tr><th></th><th>Faixa</th><th style="text-align:right">' + rotulo + '</th></tr></thead><tbody>'
+        + lista.map((g,i) =>
+            '<tr class="' + (nasDuas.has(g.chave) ? 'destaque' : '') + '">'
+            + '<td class="rank">' + (i+1) + '</td>'
+            + '<td>' + (nasDuas.has(g.chave) ? '<span class="marca">◆ </span>' : '')
+            + esc(g.chave) + '<span class="sub">' + esc(artistaDa(g)) + '</span></td>'
+            + '<td class="num">' + valor(g) + '</td></tr>').join('')
+        + '</tbody>';
+
+      document.getElementById('tabelaAmadas').innerHTML =
+        monta(amadas, g => dois(g.nota), 'Nota');
+      document.getElementById('tabelaLotadas').innerHTML =
+        monta(lotadas, g => int(g.checkins), 'Check-ins');
+
+      const nomes = [...nasDuas];
+      const topAmada = amadas[0], topLotada = lotadas[0];
+      document.getElementById('cruzamentoTitulo').textContent = nomes.length
+        ? nomes.join(' · ')
+        : 'Nenhuma faixa nas duas listas';
+      document.getElementById('cruzamentoTexto').textContent = nomes.length
+        ? 'Só ' + (nomes.length === 1 ? 'esta faixa aparece' : 'estas faixas aparecem')
+          + ' nos dois top ' + N + ' — nota alta e plateia cheia ao mesmo tempo. Para comparar: '
+          + topAmada.chave + ' tem a melhor nota (' + dois(topAmada.nota) + ') com '
+          + int(topAmada.checkins) + ' check-ins, enquanto ' + topLotada.chave + ' levou '
+          + int(topLotada.checkins) + ' pessoas com nota ' + dois(topLotada.nota) + '.'
+        : 'As duas leituras não têm interseção no top ' + N + ': o que o público mais elogiou não '
+          + 'foi o que ele mais assistiu.';
+    }
+
+    /* ---------- procedência ---------- */
+    function renderProcedencia(){
+      const p = D.procedencia;
+      document.getElementById('procTexto').innerHTML =
+        'Todos os números desta página são calculados no navegador a partir das ' + p.registros
+        + ' apresentações de <a href="../' + esc(p.base) + '">' + esc(p.base)
+        + '</a>, projetadas pelo script <a href="../' + esc(p.script) + '">' + esc(p.script)
+        + '</a>. Página gerada em ' + esc(p.gerado_em) + ' — não editar à mão. '
+        + 'Os registros da base são sintéticos.';
+      const d = p.derivados || {};
+      const partes = Object.keys(d).map(k => k + ' (' + d[k] + ')');
+      document.getElementById('procDerivados').innerHTML = partes.length
+        ? 'Valores calculados na higienização, não lidos do arquivo original: ' + partes.join(', ')
+          + '. Detalhe em <a href="../' + esc(p.qa) + '">' + esc(p.qa) + '</a>.'
+        : '';
+    }
+
+    /* ---------- navegação por âncora ---------- */
+    function ligarTabs(){
+      const tabs = [...document.querySelectorAll('nav.tabs .tab')];
+      tabs.forEach(t => t.addEventListener('click', () => {
+        tabs.forEach(o => o.classList.remove('active'));
+        t.classList.add('active');
+      }));
+    }
+
+    renderAbertura();
+    renderAto1();
+    renderAto2();
+    renderAto3();
+    renderProcedencia();
+    ligarTabs();
+  })();
+  </script>
+</body>
+</html>
