@@ -1,0 +1,1 @@
+Harness engineering é a prática de projetar a infraestrutura, as regras, as ferramentas e os mecanismos de controle ao redor de um modelo de inteligência artificial para que ele execute tarefas de forma previsível, segura e confiável.
